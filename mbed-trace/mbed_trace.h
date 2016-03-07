@@ -110,7 +110,7 @@ extern "C" {
 #define tr_cmdline(...)         mbed_tracef(TRACE_LEVEL_CMD,     TRACE_GROUP, __VA_ARGS__)   //!< Special print for cmdline. See more from TRACE_LEVEL_CMD -level
 
 /** Possible to skip all traces in compile time */
-#if defined(YOTTA_CFG_MBED_TRACE)
+#if defined(YOTTA_CFG_MBED_TRACE) || defined(HAVE_DEBUG) || (defined(YOTTA_CFG) && !defined(NDEBUG))
 
 #if defined(__GNUC__) || defined(__CC_ARM)
 /**

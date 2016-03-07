@@ -28,7 +28,7 @@
 #include "mbed-trace/mbed_trace_ip6tos.h"
 #endif
 
-#if defined(_WIN32) || defined(__unix__) || defined(__unix) || defined(unix) || defined(YOTTA_CFG)
+#if defined(_WIN32) || defined(__unix__) || defined(__unix) || defined(unix) || (defined(YOTTA_CFG) && !defined(NDEBUG))
 #ifndef MEM_ALLOC
 #define MEM_ALLOC malloc
 #endif
@@ -259,6 +259,9 @@ static void mbed_trace_default_print(const char *str)
 }
 void mbed_tracef(uint8_t dlevel, const char *grp, const char *fmt, ...)
 {
+    if (NULL == m_trace.line) {
+        return;
+    }
     m_trace.line[0] = 0; //by default trace is empty
 
     if (mbed_trace_skip(dlevel, grp) || fmt == 0 || grp == 0 || !m_trace.printf) {
