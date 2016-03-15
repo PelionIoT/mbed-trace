@@ -322,3 +322,14 @@ TEST(trace, no_printer)
     mbed_tracef(TRACE_LEVEL_DEBUG, "mygr", "this shoudnt be printed because printer is missing");
     STRCMP_EQUAL("hello", buf);
 }
+TEST(trace, uninitialized)
+{
+    mbed_tracef(TRACE_LEVEL_DEBUG, "mygr", "hello");
+    STRCMP_EQUAL("hello", buf);
+
+    mbed_trace_free();
+
+    mbed_tracef(TRACE_LEVEL_DEBUG, "mygr", "this shoudnt be printed because mtrace is not initialized");
+    STRCMP_EQUAL("hello", buf);
+}
+

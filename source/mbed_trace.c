@@ -249,6 +249,10 @@ static void mbed_trace_default_print(const char *str)
 }
 void mbed_tracef(uint8_t dlevel, const char *grp, const char *fmt, ...)
 {
+    if (NULL == m_trace.line) {
+        return;
+    }
+
     m_trace.line[0] = 0; //by default trace is empty
 
     if (mbed_trace_skip(dlevel, grp) || fmt == 0 || grp == 0 || !m_trace.printf) {
