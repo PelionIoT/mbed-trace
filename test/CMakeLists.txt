@@ -2,13 +2,13 @@
 if(DEFINED TARGET_LIKE_X86_WINDOWS_NATIVE OR DEFINED TARGET_LIKE_X86_LINUX_NATIVE)
     
     # describe the test executable
-    add_executable(mbed_trace_test EXCLUDE_FROM_ALL Test.cpp)
+    add_executable(mbed_trace_test Test.cpp)
     
     include_directories("../yotta_modules/cpputest")
     
     # describe what the test executable needs to link with
     target_link_libraries(mbed_trace_test "mbed-trace" cpputest)
-    
+
     # describe what is actual test binary
     if(DEFINED TARGET_LIKE_X86_WINDOWS_NATIVE)
         add_test(mbed_trace_test "build/x86-windows-native/test/mbed_trace_test")
