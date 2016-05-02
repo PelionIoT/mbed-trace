@@ -26,8 +26,6 @@ UNITTESTS := $(sort $(dir $(wildcard $(TEST_FOLDER)*/utest/*)))
 include sources.mk
 include include_dirs.mk
 
-SERVLIB_DIR := ../libService
-override CFLAGS += -I$(SERVLIB_DIR)/libService
 override CFLAGS += $(addprefix -I,$(INCLUDE_DIRS))
 override CFLAGS += $(addprefix -D,$(FLAGS))
 ifeq ($(DEBUG),1)
