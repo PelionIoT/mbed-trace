@@ -88,7 +88,7 @@ TEST(trace, BufferResize)
     STRCMP_EQUAL("30:30:30:30", mbed_trace_array(arr, 4));
 }
 
-#if MBED_CLIENT_TRACE_FEA_IPV6 == 1
+#if YOTTA_CFG_MBED_TRACE_FEA_IPV6 == 1
 #ifdef COMMON_FUNCTIONS_FN
 TEST(trace, ipv6)
 {
@@ -106,7 +106,7 @@ TEST(trace, active_level_all_ipv6)
   mbed_tracef(TRACE_LEVEL_DEBUG, "mygr", "my addr: %s", mbed_trace_ipv6(arr));
   STRCMP_EQUAL("[DBG ][mygr]: my addr: 2001:db8::1:0:0:1", buf);
 }
-#endif
+#endif //YOTTA_CFG_MBED_TRACE_FEA_IPV6
 
 TEST(trace, change_levels)
 {
