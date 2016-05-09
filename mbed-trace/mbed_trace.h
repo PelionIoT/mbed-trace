@@ -108,9 +108,9 @@ extern "C" {
 #define tr_error(...)           mbed_tracef(TRACE_LEVEL_ERROR,   TRACE_GROUP, __VA_ARGS__)   //!< Print Error Message
 #define tr_err(...)             mbed_tracef(TRACE_LEVEL_ERROR,   TRACE_GROUP, __VA_ARGS__)   //!< Alternative error message
 #define tr_cmdline(...)         mbed_tracef(TRACE_LEVEL_CMD,     TRACE_GROUP, __VA_ARGS__)   //!< Special print for cmdline. See more from TRACE_LEVEL_CMD -level
-
-/** Possible to skip all traces in compile time */
-#if defined(YOTTA_CFG_MBED_TRACE) || (defined(YOTTA_CFG) && !defined(NDEBUG))
+//aliases for the most commonly used functions
+#define tracef(dlevel, grp, ...)    mbed_tracef(dlevel, grp, __VA_ARGS__)   //!< Alias for mbed_tracef()
+#define trace_array(buf, len)       mbed_trace_array(buf, len)              //!< Alias for mbed_tracef()
 
 /**
  * Allow specification of default TRACE_GROUP to be used if not specified by application
@@ -124,7 +124,6 @@ extern "C" {
 #endif
 #endif
 
-#if defined(__GNUC__) || defined(__CC_ARM)
 /**
  * Initialize trace functionality
  * @return 0 when all success, otherwise non zero
@@ -230,7 +229,11 @@ const char* mbed_trace_include_filters_get(void);
  * @param fmt    trace format (like printf)
  * @param ...    variable arguments related to fmt
  */
+#if defined(__GNUC__) || defined(__CC_ARM)
 void mbed_tracef(uint8_t dlevel, const char* grp, const char *fmt, ...) __attribute__ ((__format__(__printf__, 3, 4)));
+#else
+void mbed_tracef(uint8_t dlevel, const char* grp, const char *fmt, ...);
+#endif
 /**
  *  Get last trace from buffer
  */
@@ -273,34 +276,41 @@ char* mbed_trace_ipv6_prefix(const uint8_t *prefix, uint8_t prefix_len);
  */
 char* mbed_trace_array(const uint8_t* buf, uint16_t len);
 
-#else // defined(__GNUC__) || defined(__CC_ARM)
-int  mbed_trace_init( void );
-void mbed_trace_free( void );
-void mbed_trace_buffer_sizes(int lineLength, int tmpLength);
-void mbed_trace_config_set(uint8_t config);
-uint8_t mbed_trace_config_get(void);
-void mbed_trace_prefix_function_set( char* (*pref_f)(size_t) );
-void mbed_trace_suffix_function_set(char* (*suffix_f)(void) );
-void mbed_trace_print_function_set( void (*print_f)(const char*) );
-void mbed_trace_cmdprint_function_set( void (*printf)(const char*) );
-void mbed_trace_exclude_filters_set(char* filters);
-const char* mbed_trace_exclude_filters_get(void);
-void mbed_trace_include_filters_set(char* filters);
-const char* mbed_trace_include_filters_get(void);
-void mbed_tracef(uint8_t dlevel, const char* grp, const char *fmt, ...);
-const char* mbed_trace_last(void);
-char* mbed_trace_array(const uint8_t* buf, uint16_t len);
-#if YOTTA_CFG_MBED_TRACE_FEA_IPV6 == 1
-char* mbed_trace_ipv6(const void *addr_ptr);
-char* mbed_trace_ipv6_prefix(const uint8_t *prefix, uint8_t prefix_len);       
-#endif // YOTTA_CFG_MBED_TRACE_FEA_IPV6
+#ifdef __cplusplus
+}
+#endif
 
-#endif // defined(__GNUC__) || defined(__CC_ARM)
+#endif /* MBED_TRACE_H_ */
 
+/* These macros are outside the inclusion guard so they will be re-evaluated for each individual compilation unit and
+ * if tracing is disabled, the dummies will hide the real functions. The real functions can still be reached by
+ * surrounding the name of the function with brackets, e.g. "(mbed_tracef)(dlevel, grp, "like so");"
+ * */
+#if defined(YOTTA_CFG_MBED_TRACE) || (defined(YOTTA_CFG) && !defined(NDEBUG))
+// undefine dummies, revealing the real functions
+#undef MBED_TRACE_DUMMIES_DEFINED
+#undef mbed_trace_init
+#undef mbed_trace_free
+#undef mbed_trace_buffer_sizes
+#undef mbed_trace_config_set
+#undef mbed_trace_config_get
+#undef mbed_trace_prefix_function_set
+#undef mbed_trace_suffix_function_set
+#undef mbed_trace_print_function_set
+#undef mbed_trace_cmdprint_function_set
+#undef mbed_trace_exclude_filters_set
+#undef mbed_trace_exclude_filters_get
+#undef mbed_trace_include_filters_set
+#undef mbed_trace_include_filters_get
+#undef mbed_tracef
+#undef mbed_trace_last
+#undef mbed_trace_ipv6
+#undef mbed_trace_ipv6_prefix
+#undef mbed_trace_array
 
-#else // YOTTA_CFG_MBED_TRACE
-
-// trace functionality not supported
+#elif !defined(MBED_TRACE_DUMMIES_DEFINED)
+// define dummies, hiding the real functions
+#define MBED_TRACE_DUMMIES_DEFINED
 #define mbed_trace_init(...)                ((void) 0)
 #define mbed_trace_free(...)                ((void) 0)
 #define mbed_trace_buffer_sizes(...)        ((void) 0)
@@ -311,20 +321,14 @@ char* mbed_trace_ipv6_prefix(const uint8_t *prefix, uint8_t prefix_len);
 #define mbed_trace_print_function_set(...)  ((void) 0)
 #define mbed_trace_cmdprint_function_set(...)  ((void) 0)
 #define mbed_trace_exclude_filters_set(...) ((void) 0)
-#define mbed_trace_exclude_filters_get(...) ((void) 0)
+#define mbed_trace_exclude_filters_get(...) ((char *) 0)
 #define mbed_trace_include_filters_set(...) ((void) 0)
-#define mbed_trace_include_filters_get(...) ((void) 0)
-
-#define mbed_trace_last(...)                ((void) 0)
+#define mbed_trace_include_filters_get(...) ((char *) 0)
+#define mbed_trace_last(...)                ((char *) 0)
 #define mbed_tracef(...)                    ((void) 0)
-#define mbed_trace_ipv6(...)                ((void) 0)
-#define mbed_trace_array(...)               ((void) 0)
-#define mbed_trace_ipv6_prefix(...)         ((void) 0)
 
-#endif //YOTTA_CFG_MBED_TRACE
+#define mbed_trace_ipv6(...)                dont_use_trace_helpers_outside_trace_calls
+#define mbed_trace_ipv6_prefix(...)         dont_use_trace_helpers_outside_trace_calls
+#define mbed_trace_array(...)               dont_use_trace_helpers_outside_trace_calls
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* MBED_TRACE_H_ */
+#endif /* YOTTA_CFG_MBED_TRACE */
