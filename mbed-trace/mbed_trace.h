@@ -108,9 +108,16 @@ extern "C" {
 #define tr_error(...)           mbed_tracef(TRACE_LEVEL_ERROR,   TRACE_GROUP, __VA_ARGS__)   //!< Print Error Message
 #define tr_err(...)             mbed_tracef(TRACE_LEVEL_ERROR,   TRACE_GROUP, __VA_ARGS__)   //!< Alternative error message
 #define tr_cmdline(...)         mbed_tracef(TRACE_LEVEL_CMD,     TRACE_GROUP, __VA_ARGS__)   //!< Special print for cmdline. See more from TRACE_LEVEL_CMD -level
-//aliases for the most commonly used functions
-#define tracef(dlevel, grp, ...)    mbed_tracef(dlevel, grp, __VA_ARGS__)   //!< Alias for mbed_tracef()
-#define trace_array(buf, len)       mbed_trace_array(buf, len)              //!< Alias for mbed_tracef()
+
+//aliases for the most commonly used functions and the helper functions
+#define tracef(dlevel, grp, ...)                mbed_tracef(dlevel, grp, __VA_ARGS__)       //!< Alias for mbed_tracef()
+#define tr_array(buf, len)                      mbed_trace_array(buf, len)                  //!< Alias for mbed_trace_array()
+#define tr_ipv6(addr_ptr)                       mbed_trace_ipv6(addr_ptr)                   //!< Alias for mbed_trace_ipv6()
+#define tr_ipv6_prefix(prefix, prefix_len)      mbed_trace_ipv6_prefix(prefix, prefix_len)  //!< Alias for mbed_trace_ipv6_prefix()
+#define trace_array(buf, len)                   mbed_trace_array(buf, len)                  //!< Alias for mbed_trace_array()
+#define trace_ipv6(addr_ptr)                    mbed_trace_ipv6(addr_ptr)                   //!< Alias for mbed_trace_ipv6()
+#define trace_ipv6_prefix(prefix, prefix_len)   mbed_trace_ipv6_prefix(prefix, prefix_len)  //!< Alias for mbed_trace_ipv6_prefix()
+
 
 /**
  * Allow specification of default TRACE_GROUP to be used if not specified by application
@@ -282,8 +289,8 @@ char* mbed_trace_array(const uint8_t* buf, uint16_t len);
 
 #endif /* MBED_TRACE_H_ */
 
-/* These macros are outside the inclusion guard so they will be re-evaluated for each individual compilation unit and
- * if tracing is disabled, the dummies will hide the real functions. The real functions can still be reached by
+/* These macros are outside the inclusion guard so they will be re-evaluated for every inclusion of the header.
+ * If tracing is disabled, the dummies will hide the real functions. The real functions can still be reached by
  * surrounding the name of the function with brackets, e.g. "(mbed_tracef)(dlevel, grp, "like so");"
  * */
 #if defined(YOTTA_CFG_MBED_TRACE) || (defined(YOTTA_CFG) && !defined(NDEBUG))
@@ -326,7 +333,10 @@ char* mbed_trace_array(const uint8_t* buf, uint16_t len);
 #define mbed_trace_include_filters_get(...) ((char *) 0)
 #define mbed_trace_last(...)                ((char *) 0)
 #define mbed_tracef(...)                    ((void) 0)
-
+/**
+ * These helper functions accumulate strings in a buffer that is only flushed by actual trace calls. Using these
+ * functions outside trace calls could cause the buffer to overflow.
+ */
 #define mbed_trace_ipv6(...)                dont_use_trace_helpers_outside_trace_calls
 #define mbed_trace_ipv6_prefix(...)         dont_use_trace_helpers_outside_trace_calls
 #define mbed_trace_array(...)               dont_use_trace_helpers_outside_trace_calls
