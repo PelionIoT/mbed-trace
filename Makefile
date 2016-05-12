@@ -1,9 +1,5 @@
 SRCS := $(wildcard source/*.c)
-
 LIB := libmbed-trace.a
+EXPORT_HEADERS := mbed-trace
 
-include ../../source/library_rules.mk
-
-.PHONY: export-headers
-export-headers:
-	cp -r --update ./mbed-trace ../../libService/
+include ../exported_rules.mk
