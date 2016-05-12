@@ -110,7 +110,7 @@ extern "C" {
 #define tr_cmdline(...)         mbed_tracef(TRACE_LEVEL_CMD,     TRACE_GROUP, __VA_ARGS__)   //!< Special print for cmdline. See more from TRACE_LEVEL_CMD -level
 
 /** Possible to skip all traces in compile time */
-#if defined(YOTTA_CFG_MBED_TRACE) || (defined(YOTTA_CFG) && !defined(NDEBUG))
+#if defined(FEA_TRACE_SUPPORT) || defined(YOTTA_CFG_MBED_TRACE) || (defined(YOTTA_CFG) && !defined(NDEBUG))
 
 /**
  * Allow specification of default TRACE_GROUP to be used if not specified by application
@@ -298,7 +298,7 @@ char* mbed_trace_ipv6_prefix(const uint8_t *prefix, uint8_t prefix_len);
 #endif // defined(__GNUC__) || defined(__CC_ARM)
 
 
-#else // YOTTA_CFG_MBED_TRACE
+#else // FEA_TRACE_SUPPORT
 
 // trace functionality not supported
 #define mbed_trace_init(...)                ((void) 0)
@@ -321,7 +321,7 @@ char* mbed_trace_ipv6_prefix(const uint8_t *prefix, uint8_t prefix_len);
 #define mbed_trace_array(...)               ((void) 0)
 #define mbed_trace_ipv6_prefix(...)         ((void) 0)
 
-#endif //YOTTA_CFG_MBED_TRACE
+#endif //FEA_TRACE_SUPPORT
 
 #ifdef __cplusplus
 }
