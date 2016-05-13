@@ -111,6 +111,29 @@ TEST(trace, active_level_all_ipv6)
 }
 #endif //YOTTA_CFG_MBED_TRACE_FEA_IPV6
 
+TEST(trace, config_change)
+{
+    mbed_trace_config_set(TRACE_MODE_COLOR|TRACE_ACTIVE_LEVEL_ALL);
+    CHECK(mbed_trace_config_get() == TRACE_MODE_COLOR|TRACE_ACTIVE_LEVEL_ALL);
+    mbed_trace_config_set(TRACE_MODE_PLAIN|TRACE_ACTIVE_LEVEL_NONE);
+    CHECK(mbed_trace_config_get() == TRACE_MODE_PLAIN|TRACE_ACTIVE_LEVEL_NONE);
+    mbed_trace_config_set(TRACE_MODE_PLAIN|TRACE_ACTIVE_LEVEL_ALL);
+    CHECK(mbed_trace_config_get() == TRACE_MODE_PLAIN|TRACE_ACTIVE_LEVEL_ALL);
+}
+
+TEST(trace, active_level_all_color)
+{
+  mbed_trace_config_set(TRACE_MODE_COLOR|TRACE_ACTIVE_LEVEL_ALL);
+  mbed_tracef(TRACE_LEVEL_DEBUG, "mygr", "hello");
+  STRCMP_EQUAL("\x1b[90m[DBG ][mygr]: hello\x1b[0m", buf);
+  mbed_tracef(TRACE_LEVEL_INFO, "mygr", "to one");
+  STRCMP_EQUAL("\x1b[39m[INFO][mygr]: to one\x1b[0m", buf);
+  mbed_tracef(TRACE_LEVEL_WARN, "mygr", "and all");
+  STRCMP_EQUAL("\x1b[33m[WARN][mygr]: and all\x1b[0m", buf);
+  mbed_tracef(TRACE_LEVEL_ERROR, "mygr", "even you");
+  STRCMP_EQUAL("\x1b[31m[ERR ][mygr]: even you\x1b[0m", buf);
+}
+
 TEST(trace, change_levels)
 {
   mbed_trace_config_set(TRACE_ACTIVE_LEVEL_DEBUG);
