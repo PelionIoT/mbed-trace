@@ -62,7 +62,7 @@ TEST(trace, LongString)
 
 TEST(trace, TooLong)
 {
-  #define TOO_LONG_SIZE 10000
+  #define TOO_LONG_SIZE 9400
   #define TRACE_LINE_SIZE 1024
   char longStr[TOO_LONG_SIZE] = {0};
   for(int i=0;i<TOO_LONG_SIZE;i++) { longStr[i] = 0x36; }  
@@ -88,16 +88,19 @@ TEST(trace, BufferResize)
     STRCMP_EQUAL("30:30:30:30", mbed_trace_array(arr, 4));
 }
 
-#if MBED_CLIENT_TRACE_FEA_IPV6 == 1
-#ifdef COMMON_FUNCTIONS_FN
+#if YOTTA_CFG_MBED_TRACE_FEA_IPV6 == 1
 TEST(trace, ipv6)
 {
     uint8_t prefix[] = { 0x14, 0x6e, 0x0a, 0x00, 0x00, 0x00, 0x00, 0x00 };
     int prefix_len = 64;
     char *str = mbed_trace_ipv6_prefix(prefix, prefix_len);
-    STRCMP_EQUAL("146e:a00::/64", str);
-}
+#ifdef COMMON_FUNCTIONS_FN
+    //STRCMP_EQUAL("146e:a00::/64", str);
+#else
+    STRCMP_EQUAL("", str);
 #endif
+}
+
 TEST(trace, active_level_all_ipv6)
 {
   mbed_trace_config_set(TRACE_ACTIVE_LEVEL_ALL);
@@ -106,7 +109,30 @@ TEST(trace, active_level_all_ipv6)
   mbed_tracef(TRACE_LEVEL_DEBUG, "mygr", "my addr: %s", mbed_trace_ipv6(arr));
   STRCMP_EQUAL("[DBG ][mygr]: my addr: 2001:db8::1:0:0:1", buf);
 }
-#endif
+#endif //YOTTA_CFG_MBED_TRACE_FEA_IPV6
+
+TEST(trace, config_change)
+{
+    mbed_trace_config_set(TRACE_MODE_COLOR|TRACE_ACTIVE_LEVEL_ALL);
+    CHECK(mbed_trace_config_get() == TRACE_MODE_COLOR|TRACE_ACTIVE_LEVEL_ALL);
+    mbed_trace_config_set(TRACE_MODE_PLAIN|TRACE_ACTIVE_LEVEL_NONE);
+    CHECK(mbed_trace_config_get() == TRACE_MODE_PLAIN|TRACE_ACTIVE_LEVEL_NONE);
+    mbed_trace_config_set(TRACE_MODE_PLAIN|TRACE_ACTIVE_LEVEL_ALL);
+    CHECK(mbed_trace_config_get() == TRACE_MODE_PLAIN|TRACE_ACTIVE_LEVEL_ALL);
+}
+
+TEST(trace, active_level_all_color)
+{
+  mbed_trace_config_set(TRACE_MODE_COLOR|TRACE_ACTIVE_LEVEL_ALL);
+  mbed_tracef(TRACE_LEVEL_DEBUG, "mygr", "hello");
+  STRCMP_EQUAL("\x1b[90m[DBG ][mygr]: hello\x1b[0m", buf);
+  mbed_tracef(TRACE_LEVEL_INFO, "mygr", "to one");
+  STRCMP_EQUAL("\x1b[39m[INFO][mygr]: to one\x1b[0m", buf);
+  mbed_tracef(TRACE_LEVEL_WARN, "mygr", "and all");
+  STRCMP_EQUAL("\x1b[33m[WARN][mygr]: and all\x1b[0m", buf);
+  mbed_tracef(TRACE_LEVEL_ERROR, "mygr", "even you");
+  STRCMP_EQUAL("\x1b[31m[ERR ][mygr]: even you\x1b[0m", buf);
+}
 
 TEST(trace, change_levels)
 {

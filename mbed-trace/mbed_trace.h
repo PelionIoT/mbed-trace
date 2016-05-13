@@ -293,7 +293,7 @@ char* mbed_trace_array(const uint8_t* buf, uint16_t len);
  * If tracing is disabled, the dummies will hide the real functions. The real functions can still be reached by
  * surrounding the name of the function with brackets, e.g. "(mbed_tracef)(dlevel, grp, "like so");"
  * */
-#if defined(YOTTA_CFG_MBED_TRACE) || (defined(YOTTA_CFG) && !defined(NDEBUG))
+#if defined(FEA_TRACE_SUPPORT) || defined(YOTTA_CFG_MBED_TRACE) || (defined(YOTTA_CFG) && !defined(NDEBUG))
 // undefine dummies, revealing the real functions
 #undef MBED_TRACE_DUMMIES_DEFINED
 #undef mbed_trace_init
@@ -341,4 +341,4 @@ char* mbed_trace_array(const uint8_t* buf, uint16_t len);
 #define mbed_trace_ipv6_prefix(...)         dont_use_trace_helpers_outside_trace_calls
 #define mbed_trace_array(...)               dont_use_trace_helpers_outside_trace_calls
 
-#endif /* YOTTA_CFG_MBED_TRACE */
+#endif /* FEA_TRACE_SUPPORT */
