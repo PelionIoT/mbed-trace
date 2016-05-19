@@ -29,5 +29,8 @@
     "x86-windows-native": {
       "cpputest": "ARMmbed/cpputest"
     }
+  },
+  "dependencies": {
+    "nanostack-libservice": "^3.4.0"
   }
 }

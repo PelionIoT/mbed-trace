@@ -25,7 +25,8 @@
 
 #include "mbed-trace/mbed_trace.h"
 #if YOTTA_CFG_MBED_TRACE_FEA_IPV6 == 1
-#include "mbed-trace/mbed_trace_ip6tos.h"
+#include "mbed-client-libservice/ip6string.h"
+#include "mbed-client-libservice/common_functions.h"
 #endif
 
 #ifndef MEM_ALLOC
@@ -436,7 +437,7 @@ char *mbed_trace_ipv6(const void *addr_ptr)
         return "<null>";
     }
     str[0] = 0;
-    mbed_trace_ip6tos(addr_ptr, str);
+    ip6tos(addr_ptr, str);
     m_trace.tmp_data_ptr += strlen(str) + 1;
     return str;
 }
@@ -458,14 +459,10 @@ char *mbed_trace_ipv6_prefix(const uint8_t *prefix, uint8_t prefix_len)
         if (prefix == NULL || prefix_len > 128) {
             return "<err>";
         }
-#ifdef COMMON_FUNCTIONS_FN        
         bitcopy(addr, prefix, prefix_len);
-#else
-        return "";
-#endif  //COMMON_FUNCTIONS_FN
     }
 
-    mbed_trace_ip6tos(addr, tmp);
+    ip6tos(addr, tmp);
     retval = snprintf(str, bLeft, "%s/%u", tmp, prefix_len);
     if (retval <= 0 || retval > bLeft) {
         return "";

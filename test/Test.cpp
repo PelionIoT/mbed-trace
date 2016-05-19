@@ -89,16 +89,17 @@ TEST(trace, BufferResize)
 }
 
 #if YOTTA_CFG_MBED_TRACE_FEA_IPV6 == 1
+const char *ip6tos_output_string;
+uint8_t ip6tos_input_array[16];
+
 TEST(trace, ipv6)
 {
     uint8_t prefix[] = { 0x14, 0x6e, 0x0a, 0x00, 0x00, 0x00, 0x00, 0x00 };
     int prefix_len = 64;
+    ip6tos_output_string = "146e:a00::";
     char *str = mbed_trace_ipv6_prefix(prefix, prefix_len);
-#ifdef COMMON_FUNCTIONS_FN
-    //STRCMP_EQUAL("146e:a00::/64", str);
-#else
-    STRCMP_EQUAL("", str);
-#endif
+    CHECK(memcmp(ip6tos_input_array, prefix, 8) == 0);
+    STRCMP_EQUAL("146e:a00::/64", str);
 }
 
 TEST(trace, active_level_all_ipv6)
@@ -106,7 +107,9 @@ TEST(trace, active_level_all_ipv6)
   mbed_trace_config_set(TRACE_ACTIVE_LEVEL_ALL);
   
   uint8_t arr[] = { 0x20, 0x01, 0xd, 0xb8, 0,0,0,0,0,1,0,0,0,0,0,1 };
+  ip6tos_output_string = "2001:db8::1:0:0:1";
   mbed_tracef(TRACE_LEVEL_DEBUG, "mygr", "my addr: %s", mbed_trace_ipv6(arr));
+  CHECK(memcmp(ip6tos_input_array, arr, 16) == 0);
   STRCMP_EQUAL("[DBG ][mygr]: my addr: 2001:db8::1:0:0:1", buf);
 }
 #endif //YOTTA_CFG_MBED_TRACE_FEA_IPV6
