@@ -16,7 +16,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
-#include <stdlib.h>
 
 #ifndef YOTTA_CFG_MBED_TRACE
 #define YOTTA_CFG_MBED_TRACE
@@ -28,12 +27,23 @@
 #include "mbed-trace/mbed_trace_ip6tos.h"
 #endif
 
-#ifndef MEM_ALLOC
-#define MEM_ALLOC malloc
+#if defined(YOTTA_CFG_MBED_TRACE_MEM)
+#define MBED_TRACE_MEM_INCLUDE      YOTTA_CFG_MBED_TRACE_MEM_INCLUDE
+#define MBED_TRACE_MEM_ALLOC        YOTTA_CFG_MBED_TRACE_MEM_ALLOC
+#define MBED_TRACE_MEM_FREE         YOTTA_CFG_MBED_TRACE_MEM_FREE
+#else /* YOTTA_CFG_MEMLIB */
+// Default options
+#ifndef MBED_TRACE_MEM_INCLUDE
+#define MBED_TRACE_MEM_INCLUDE   <stdlib.h>
 #endif
-#ifndef MEM_FREE
-#define MEM_FREE free
+#include MBED_TRACE_MEM_INCLUDE
+#ifndef MBED_TRACE_MEM_ALLOC
+#define MBED_TRACE_MEM_ALLOC malloc
 #endif
+#ifndef MBED_TRACE_MEM_FREE
+#define MBED_TRACE_MEM_FREE  free
+#endif
+#endif /* YOTTA_CFG_MEMLIB */
 
 #define VT100_COLOR_ERROR "\x1b[31m"
 #define VT100_COLOR_WARN  "\x1b[33m"
@@ -107,19 +117,19 @@ int mbed_trace_init(void)
     m_trace.trace_config = TRACE_MODE_COLOR | TRACE_ACTIVE_LEVEL_ALL | TRACE_CARRIAGE_RETURN;
     m_trace.line_length = DEFAULT_TRACE_LINE_LENGTH;
     if (m_trace.line == NULL) {
-        m_trace.line = MEM_ALLOC(m_trace.line_length);
+        m_trace.line = MBED_TRACE_MEM_ALLOC(m_trace.line_length);
     }
     m_trace.tmp_data_length = DEFAULT_TRACE_TMP_LINE_LEN;
     if (m_trace.tmp_data == NULL) {
-        m_trace.tmp_data = MEM_ALLOC(m_trace.tmp_data_length);
+        m_trace.tmp_data = MBED_TRACE_MEM_ALLOC(m_trace.tmp_data_length);
     }
     m_trace.tmp_data_ptr = m_trace.tmp_data;
     m_trace.filters_length = DEFAULT_TRACE_FILTER_LENGTH;
     if (m_trace.filters_exclude == NULL) {
-        m_trace.filters_exclude = MEM_ALLOC(m_trace.filters_length);
+        m_trace.filters_exclude = MBED_TRACE_MEM_ALLOC(m_trace.filters_length);
     }
     if (m_trace.filters_include == NULL) {
-        m_trace.filters_include = MEM_ALLOC(m_trace.filters_length);
+        m_trace.filters_include = MBED_TRACE_MEM_ALLOC(m_trace.filters_length);
     }
 
     if (m_trace.line == NULL ||
@@ -144,15 +154,15 @@ int mbed_trace_init(void)
 }
 void mbed_trace_free(void)
 {
-    MEM_FREE(m_trace.line);
+    MBED_TRACE_MEM_FREE(m_trace.line);
     m_trace.line_length = 0;
     m_trace.line = 0;
-    MEM_FREE(m_trace.tmp_data);
+    MBED_TRACE_MEM_FREE(m_trace.tmp_data);
     m_trace.tmp_data = 0;
     m_trace.tmp_data_ptr = 0;
-    MEM_FREE(m_trace.filters_exclude);
+    MBED_TRACE_MEM_FREE(m_trace.filters_exclude);
     m_trace.filters_exclude = 0;
-    MEM_FREE(m_trace.filters_include);
+    MBED_TRACE_MEM_FREE(m_trace.filters_include);
     m_trace.filters_include = 0;
     m_trace.filters_length = 0;
     m_trace.prefix_f = 0;
@@ -162,8 +172,8 @@ void mbed_trace_free(void)
 }
 static void mbed_trace_realloc( char **buffer, int *length_ptr, int new_length)
 {
-    MEM_FREE(*buffer);
-    *buffer  = MEM_ALLOC(new_length);
+    MBED_TRACE_MEM_FREE(*buffer);
+    *buffer  = MBED_TRACE_MEM_ALLOC(new_length);
     *length_ptr = new_length;
 }
 void mbed_trace_buffer_sizes(int lineLength, int tmpLength)
