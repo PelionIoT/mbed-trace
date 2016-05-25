@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015 ARM Limited. All rights reserved.
+ * Copyright (c) 2016 ARM Limited. All rights reserved.
  */
 #ifndef MBED_TRACE_TEST_STUBS_IP6STRING_H_
 #define MBED_TRACE_TEST_STUBS_IP6STRING_H_

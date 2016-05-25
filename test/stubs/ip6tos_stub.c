@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015 ARM Limited. All rights reserved.
+ * Copyright (c) 2016 ARM Limited. All rights reserved.
  */
 #include "ip6string_stub.h"
 #include <string.h>
