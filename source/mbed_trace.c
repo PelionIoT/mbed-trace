@@ -260,6 +260,13 @@ static void mbed_trace_default_print(const char *str)
 }
 void mbed_tracef(uint8_t dlevel, const char *grp, const char *fmt, ...)
 {
+    va_list ap;
+    va_start(ap, fmt);
+    mbed_vtracef(dlevel, grp, fmt, ap);
+    va_end(ap);
+}
+void mbed_vtracef(uint8_t dlevel, const char* grp, const char *fmt, va_list ap)
+{
     if (NULL == m_trace.line) {
         return;
     }
@@ -279,11 +286,8 @@ void mbed_tracef(uint8_t dlevel, const char *grp, const char *fmt, ...)
         int retval = 0, bLeft = m_trace.line_length;
         char *ptr = m_trace.line;
         if (plain == true || dlevel == TRACE_LEVEL_CMD) {
-            va_list ap;
-            va_start(ap, fmt);
             //add trace data
             retval = vsnprintf(ptr, bLeft, fmt, ap);
-            va_end(ap);
             if (dlevel == TRACE_LEVEL_CMD && m_trace.cmd_printf) {
                 m_trace.cmd_printf(m_trace.line);
                 m_trace.cmd_printf("\n");
@@ -334,8 +338,6 @@ void mbed_tracef(uint8_t dlevel, const char *grp, const char *fmt, ...)
 
             }
             if (bLeft > 0 && m_trace.prefix_f) {
-                va_list ap;
-                va_start(ap, fmt);
                 //find out length of body
                 size_t sz = 0;
                 sz = vsnprintf(NULL, 0, fmt, ap) + retval + (retval ? 4 : 0);
@@ -348,7 +350,6 @@ void mbed_tracef(uint8_t dlevel, const char *grp, const char *fmt, ...)
                     ptr += retval;
                     bLeft -= retval;
                 }
-                va_end(ap);
             }
             if (bLeft > 0) {
                 //add group tag
@@ -378,8 +379,6 @@ void mbed_tracef(uint8_t dlevel, const char *grp, const char *fmt, ...)
                 }
             }
             if (retval > 0 && bLeft > 0) {
-                va_list ap;
-                va_start(ap, fmt);
                 //add trace text
                 retval = vsnprintf(ptr, bLeft, fmt, ap);
                 if (retval >= bLeft) {
@@ -389,7 +388,6 @@ void mbed_tracef(uint8_t dlevel, const char *grp, const char *fmt, ...)
                     ptr += retval;
                     bLeft -= retval;
                 }
-                va_end(ap);
             }
 
             if (retval > 0 && bLeft > 0  && m_trace.suffix_f) {
