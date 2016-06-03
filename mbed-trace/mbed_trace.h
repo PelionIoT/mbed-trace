@@ -206,6 +206,20 @@ void mbed_trace_print_function_set( void (*print_f)(const char*) );
  */
 void mbed_trace_cmdprint_function_set( void (*printf)(const char*) );
 /**
+ * Set trace mutex wait function
+ * By default, trace calls are not thread safe.
+ * If thread safety is required this can be used to set a callback function that will be called before each trace call.
+ * The specific implementation is up to the application developer, but simple mutex locking is assumed.
+ */
+void mbed_trace_mutex_wait_function_set(void (*mutex_wait_f)());
+/**
+ * Set trace mutex release function
+ * By default, trace calls are not thread safe.
+ * If thread safety is required this can be used to set a callback function that will be called before returning from
+ * each trace call. The specific implementation is up to the application developer, but simple mutex locking is assumed.
+ */
+void mbed_trace_mutex_release_function_set(void (*mutex_release_f)());
+/**
  * When trace group contains text in filters,
  * trace print will be ignored.
  * e.g.: 
@@ -330,6 +344,8 @@ char* mbed_trace_array(const uint8_t* buf, uint16_t len);
 #undef mbed_trace_suffix_function_set
 #undef mbed_trace_print_function_set
 #undef mbed_trace_cmdprint_function_set
+#undef mbed_trace_mutex_wait_function_set
+#undef mbed_trace_mutex_release_function_set
 #undef mbed_trace_exclude_filters_set
 #undef mbed_trace_exclude_filters_get
 #undef mbed_trace_include_filters_set
@@ -344,22 +360,24 @@ char* mbed_trace_array(const uint8_t* buf, uint16_t len);
 #elif !defined(MBED_TRACE_DUMMIES_DEFINED)
 // define dummies, hiding the real functions
 #define MBED_TRACE_DUMMIES_DEFINED
-#define mbed_trace_init(...)                ((void) 0)
-#define mbed_trace_free(...)                ((void) 0)
-#define mbed_trace_buffer_sizes(...)        ((void) 0)
-#define mbed_trace_config_set(...)          ((void) 0)
-#define mbed_trace_config_get(...)          ((void) 0)
-#define mbed_trace_prefix_function_set(...) ((void) 0)
-#define mbed_trace_suffix_function_set(...) ((void) 0)
-#define mbed_trace_print_function_set(...)  ((void) 0)
-#define mbed_trace_cmdprint_function_set(...)  ((void) 0)
-#define mbed_trace_exclude_filters_set(...) ((void) 0)
-#define mbed_trace_exclude_filters_get(...) ((char *) 0)
-#define mbed_trace_include_filters_set(...) ((void) 0)
-#define mbed_trace_include_filters_get(...) ((char *) 0)
-#define mbed_trace_last(...)                ((char *) 0)
-#define mbed_tracef(...)                    ((void) 0)
-#define mbed_vtracef(...)                   ((void) 0)
+#define mbed_trace_init(...)                        ((void) 0)
+#define mbed_trace_free(...)                        ((void) 0)
+#define mbed_trace_buffer_sizes(...)                ((void) 0)
+#define mbed_trace_config_set(...)                  ((void) 0)
+#define mbed_trace_config_get(...)                  ((void) 0)
+#define mbed_trace_prefix_function_set(...)         ((void) 0)
+#define mbed_trace_suffix_function_set(...)         ((void) 0)
+#define mbed_trace_print_function_set(...)          ((void) 0)
+#define mbed_trace_cmdprint_function_set(...)       ((void) 0)
+#define mbed_trace_mutex_wait_function_set(...)     ((void) 0)
+#define mbed_trace_mutex_release_function_set(...)  ((void) 0)
+#define mbed_trace_exclude_filters_set(...)         ((void) 0)
+#define mbed_trace_exclude_filters_get(...)         ((char *) 0)
+#define mbed_trace_include_filters_set(...)         ((void) 0)
+#define mbed_trace_include_filters_get(...)         ((char *) 0)
+#define mbed_trace_last(...)                        ((char *) 0)
+#define mbed_tracef(...)                            ((void) 0)
+#define mbed_vtracef(...)                           ((void) 0)
 /**
  * These helper functions accumulate strings in a buffer that is only flushed by actual trace calls. Using these
  * functions outside trace calls could cause the buffer to overflow.

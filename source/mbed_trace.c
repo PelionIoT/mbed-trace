@@ -67,6 +67,10 @@
 /** default max filters (include/exclude) length in bytes */
 #define DEFAULT_TRACE_FILTER_LENGTH       24
 
+/* Mutex callback function usage macros to make sure the functions aren't called unless they have been set. */
+#define MUTEX_WAIT() if ( m_trace.mutex_wait_f != NULL ) m_trace.mutex_wait_f()
+#define MUTEX_RELEASE() if ( m_trace.mutex_release_f != NULL ) m_trace.mutex_release_f()
+
 /** default print function, just redirect str to printf */
 static void mbed_trace_realloc( char **buffer, int *length_ptr, int new_length);
 static void mbed_trace_default_print(const char *str);
@@ -100,6 +104,11 @@ typedef struct trace_s {
     void (*printf)(const char *);
     /** print out function for TRACE_LEVEL_CMD */
     void (*cmd_printf)(const char *);
+    /** mutex wait function which can be called to lock against a mutex. Use MUTEX_WAIT() instead of calling directly.*/
+    void (*mutex_wait_f)(void);
+    /** mutex release function which must be used to release the mutex locked by mutex_wait_f. Use MUTEX_RELEASE()
+     *  instead of calling directly. */
+    void (*mutex_release_f)(void);
 } trace_t;
 
 static trace_t m_trace = {
@@ -110,7 +119,9 @@ static trace_t m_trace = {
     .prefix_f = 0,
     .suffix_f = 0,
     .printf  = 0,
-    .cmd_printf = 0
+    .cmd_printf = 0,
+    .mutex_wait_f = 0,
+    .mutex_release_f = 0
 };
 
 int mbed_trace_init(void)
@@ -150,6 +161,8 @@ int mbed_trace_init(void)
     m_trace.suffix_f = 0;
     m_trace.printf = mbed_trace_default_print;
     m_trace.cmd_printf = 0;
+    m_trace.mutex_wait_f = 0;
+    m_trace.mutex_release_f = 0;
 
     return 0;
 }
@@ -170,6 +183,8 @@ void mbed_trace_free(void)
     m_trace.suffix_f = 0;
     m_trace.printf = mbed_trace_default_print;
     m_trace.cmd_printf = 0;
+    m_trace.mutex_wait_f = 0;
+    m_trace.mutex_release_f = 0;
 }
 static void mbed_trace_realloc( char **buffer, int *length_ptr, int new_length)
 {
@@ -210,6 +225,14 @@ void mbed_trace_print_function_set(void (*printf)(const char *))
 void mbed_trace_cmdprint_function_set(void (*printf)(const char *))
 {
     m_trace.cmd_printf = printf;
+}
+void mbed_trace_mutex_wait_function_set(void (*mutex_wait_f)())
+{
+    m_trace.mutex_wait_f = mutex_wait_f;
+}
+void mbed_trace_mutex_release_function_set(void (*mutex_release_f)())
+{
+    m_trace.mutex_release_f = mutex_release_f;
 }
 void mbed_trace_exclude_filters_set(char *filters)
 {
@@ -267,7 +290,10 @@ void mbed_tracef(uint8_t dlevel, const char *grp, const char *fmt, ...)
 }
 void mbed_vtracef(uint8_t dlevel, const char* grp, const char *fmt, va_list ap)
 {
+    MUTEX_WAIT(); //MUTEX_RELEASE() must be called before returning
+
     if (NULL == m_trace.line) {
+        MUTEX_RELEASE();
         return;
     }
 
@@ -276,6 +302,7 @@ void mbed_vtracef(uint8_t dlevel, const char* grp, const char *fmt, va_list ap)
     if (mbed_trace_skip(dlevel, grp) || fmt == 0 || grp == 0 || !m_trace.printf) {
         //return tmp data pointer back to the beginning
         mbed_trace_reset_tmp();
+        MUTEX_RELEASE();
         return;
     }
     if ((m_trace.trace_config & TRACE_MASK_LEVEL) &  dlevel) {
@@ -420,6 +447,8 @@ void mbed_vtracef(uint8_t dlevel, const char* grp, const char *fmt, va_list ap)
         //return tmp data pointer back to the beginning
         mbed_trace_reset_tmp();
     }
+
+    MUTEX_RELEASE();
 }
 static void mbed_trace_reset_tmp(void)
 {

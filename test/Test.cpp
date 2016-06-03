@@ -30,6 +30,16 @@ void myprint(const char* str)
   strcpy(buf, str);
 }
 
+static int mutex_call_count = 0;
+void my_mutex_wait()
+{
+    mutex_call_count++;
+}
+
+void my_mutex_release()
+{
+    mutex_call_count--;
+}
 TEST_GROUP(trace)
 {
   void setup()
@@ -46,6 +56,22 @@ TEST_GROUP(trace)
 };
 
 /* Unity test code starts */
+TEST(trace, MutexNotSet)
+{
+  char expectedStr[] = "Hello hello!";
+  mbed_tracef(TRACE_LEVEL_DEBUG, "mygr", "Hello hello!");
+  STRCMP_EQUAL(expectedStr, buf);
+}
+TEST(trace, MutexSet)
+{
+  mbed_trace_mutex_wait_function_set( my_mutex_wait );
+  mbed_trace_mutex_release_function_set( my_mutex_release );
+
+  char expectedStr[] = "Hello hello!";
+  mbed_tracef(TRACE_LEVEL_DEBUG, "mygr", "Hello hello!");
+  STRCMP_EQUAL(expectedStr, buf);
+  CHECK(mutex_call_count == 0);
+}
 TEST(trace, Array)
 {
   unsigned char longStr[200] = {0x66};
