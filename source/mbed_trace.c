@@ -67,10 +67,6 @@
 /** default max filters (include/exclude) length in bytes */
 #define DEFAULT_TRACE_FILTER_LENGTH       24
 
-/* Mutex callback function usage macros to make sure the functions aren't called unless they have been set. */
-#define MUTEX_WAIT() if ( m_trace.mutex_wait_f != NULL ) m_trace.mutex_wait_f()
-#define MUTEX_RELEASE() if ( m_trace.mutex_release_f != NULL ) m_trace.mutex_release_f()
-
 /** default print function, just redirect str to printf */
 static void mbed_trace_realloc( char **buffer, int *length_ptr, int new_length);
 static void mbed_trace_default_print(const char *str);
@@ -104,11 +100,12 @@ typedef struct trace_s {
     void (*printf)(const char *);
     /** print out function for TRACE_LEVEL_CMD */
     void (*cmd_printf)(const char *);
-    /** mutex wait function which can be called to lock against a mutex. Use MUTEX_WAIT() instead of calling directly.*/
+    /** mutex wait function which can be called to lock against a mutex. */
     void (*mutex_wait_f)(void);
-    /** mutex release function which must be used to release the mutex locked by mutex_wait_f. Use MUTEX_RELEASE()
-     *  instead of calling directly. */
+    /** mutex release function which must be used to release the mutex locked by mutex_wait_f. */
     void (*mutex_release_f)(void);
+    /** number of times the mutex has been locked */
+    int mutex_lock_count;
 } trace_t;
 
 static trace_t m_trace = {
@@ -226,11 +223,11 @@ void mbed_trace_cmdprint_function_set(void (*printf)(const char *))
 {
     m_trace.cmd_printf = printf;
 }
-void mbed_trace_mutex_wait_function_set(void (*mutex_wait_f)())
+void mbed_trace_mutex_wait_function_set(void (*mutex_wait_f)(void))
 {
     m_trace.mutex_wait_f = mutex_wait_f;
 }
-void mbed_trace_mutex_release_function_set(void (*mutex_release_f)())
+void mbed_trace_mutex_release_function_set(void (*mutex_release_f)(void))
 {
     m_trace.mutex_release_f = mutex_release_f;
 }
@@ -290,11 +287,13 @@ void mbed_tracef(uint8_t dlevel, const char *grp, const char *fmt, ...)
 }
 void mbed_vtracef(uint8_t dlevel, const char* grp, const char *fmt, va_list ap)
 {
-    MUTEX_WAIT(); //MUTEX_RELEASE() must be called before returning
+    if ( m_trace.mutex_wait_f ) {
+        m_trace.mutex_wait_f();
+        m_trace.mutex_lock_count++;
+    }
 
     if (NULL == m_trace.line) {
-        MUTEX_RELEASE();
-        return;
+        goto end;
     }
 
     m_trace.line[0] = 0; //by default trace is empty
@@ -302,8 +301,7 @@ void mbed_vtracef(uint8_t dlevel, const char* grp, const char *fmt, va_list ap)
     if (mbed_trace_skip(dlevel, grp) || fmt == 0 || grp == 0 || !m_trace.printf) {
         //return tmp data pointer back to the beginning
         mbed_trace_reset_tmp();
-        MUTEX_RELEASE();
-        return;
+        goto end;
     }
     if ((m_trace.trace_config & TRACE_MASK_LEVEL) &  dlevel) {
         bool color = (m_trace.trace_config & TRACE_MODE_COLOR) != 0;
@@ -448,7 +446,12 @@ void mbed_vtracef(uint8_t dlevel, const char* grp, const char *fmt, va_list ap)
         mbed_trace_reset_tmp();
     }
 
-    MUTEX_RELEASE();
+end:
+    if ( m_trace.mutex_release_f ) {
+        for ( ;m_trace.mutex_lock_count > 0; m_trace.mutex_lock_count-- ) {
+            m_trace.mutex_release_f();
+        }
+    }
 }
 static void mbed_trace_reset_tmp(void)
 {
@@ -463,6 +466,11 @@ const char *mbed_trace_last(void)
 #if YOTTA_CFG_MBED_TRACE_FEA_IPV6 == 1
 char *mbed_trace_ipv6(const void *addr_ptr)
 {
+    /** Acquire mutex. It is released before returning from mbed_vtracef. */
+    if ( m_trace.mutex_wait_f ) {
+        m_trace.mutex_wait_f();
+        m_trace.mutex_lock_count++;
+    }
     char *str = m_trace.tmp_data_ptr;
     if (str == NULL) {
         return "";
@@ -480,6 +488,11 @@ char *mbed_trace_ipv6(const void *addr_ptr)
 }
 char *mbed_trace_ipv6_prefix(const uint8_t *prefix, uint8_t prefix_len)
 {
+    /** Acquire mutex. It is released before returning from mbed_vtracef. */
+    if ( m_trace.mutex_wait_f ) {
+        m_trace.mutex_wait_f();
+        m_trace.mutex_lock_count++;
+    }
     char *str = m_trace.tmp_data_ptr;
     int retval, bLeft = tmp_data_left();
     char tmp[40];
@@ -511,6 +524,11 @@ char *mbed_trace_ipv6_prefix(const uint8_t *prefix, uint8_t prefix_len)
 #endif //YOTTA_CFG_MBED_TRACE_FEA_IPV6
 char *mbed_trace_array(const uint8_t *buf, uint16_t len)
 {
+    /** Acquire mutex. It is released before returning from mbed_vtracef. */
+    if ( m_trace.mutex_wait_f ) {
+        m_trace.mutex_wait_f();
+        m_trace.mutex_lock_count++;
+    }
     int i, bLeft = tmp_data_left();
     char *str, *wptr;
     str = m_trace.tmp_data_ptr;

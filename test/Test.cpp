@@ -23,22 +23,27 @@ int main(int ac, char **av)
 {
     return CommandLineTestRunner::RunAllTests(ac, av);
 }
+
+static int mutex_wait_count = 0;
+static int mutex_release_count = 0;
+static bool check_mutex_lock_status = true;
+void my_mutex_wait()
+{
+  mutex_wait_count++;
+}
+void my_mutex_release()
+{
+  mutex_release_count++;
+}
+
 char buf[1024];
 #include <stdio.h>
 void myprint(const char* str)
 {
+  if ( check_mutex_lock_status ) {
+      CHECK( (mutex_wait_count - mutex_release_count) > 0 );
+  }
   strcpy(buf, str);
-}
-
-static int mutex_call_count = 0;
-void my_mutex_wait()
-{
-    mutex_call_count++;
-}
-
-void my_mutex_release()
-{
-    mutex_call_count--;
 }
 TEST_GROUP(trace)
 {
@@ -47,10 +52,13 @@ TEST_GROUP(trace)
 
     mbed_trace_init();
     mbed_trace_config_set(TRACE_MODE_PLAIN|TRACE_ACTIVE_LEVEL_ALL);
-    mbed_trace_print_function_set( myprint ); 
+    mbed_trace_print_function_set( myprint );
+    mbed_trace_mutex_wait_function_set( my_mutex_wait );
+    mbed_trace_mutex_release_function_set( my_mutex_release );
   }
   void teardown()
   {
+    CHECK(mutex_wait_count == mutex_release_count); // Check the mutex count with every test
     mbed_trace_free();
   }
 };
@@ -58,20 +66,23 @@ TEST_GROUP(trace)
 /* Unity test code starts */
 TEST(trace, MutexNotSet)
 {
-  char expectedStr[] = "Hello hello!";
-  mbed_tracef(TRACE_LEVEL_DEBUG, "mygr", "Hello hello!");
-  STRCMP_EQUAL(expectedStr, buf);
-}
-TEST(trace, MutexSet)
-{
-  mbed_trace_mutex_wait_function_set( my_mutex_wait );
-  mbed_trace_mutex_release_function_set( my_mutex_release );
+  mbed_trace_mutex_wait_function_set( 0 );
+  mbed_trace_mutex_release_function_set( 0 );
+  int mutex_call_count_at_entry = mutex_wait_count;
+  check_mutex_lock_status = false;
 
   char expectedStr[] = "Hello hello!";
   mbed_tracef(TRACE_LEVEL_DEBUG, "mygr", "Hello hello!");
   STRCMP_EQUAL(expectedStr, buf);
-  CHECK(mutex_call_count == 0);
+
+  CHECK( mutex_call_count_at_entry == mutex_wait_count );
+  CHECK( mutex_call_count_at_entry == mutex_release_count );
+
+  mbed_trace_mutex_wait_function_set( my_mutex_wait );
+  mbed_trace_mutex_release_function_set( my_mutex_release );
+  check_mutex_lock_status = true;
 }
+
 TEST(trace, Array)
 {
   unsigned char longStr[200] = {0x66};
@@ -112,6 +123,8 @@ TEST(trace, BufferResize)
     STRCMP_EQUAL("30:30:30:30*", mbed_trace_array(arr, 20));
     mbed_trace_buffer_sizes(0, 15);
     STRCMP_EQUAL("30:30:30:30", mbed_trace_array(arr, 4));
+
+    mbed_tracef(TRACE_LEVEL_DEBUG, "mygr", "flush buffers and locks");
 }
 
 #if YOTTA_CFG_MBED_TRACE_FEA_IPV6 == 1
@@ -126,6 +139,8 @@ TEST(trace, ipv6)
     char *str = mbed_trace_ipv6_prefix(prefix, prefix_len);
     CHECK(memcmp(ip6tos_input_array, prefix, 8) == 0);
     STRCMP_EQUAL("146e:a00::/64", str);
+
+    mbed_tracef(TRACE_LEVEL_DEBUG, "mygr", "flush buffers and locks");
 }
 
 TEST(trace, active_level_all_ipv6)

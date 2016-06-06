@@ -209,16 +209,18 @@ void mbed_trace_cmdprint_function_set( void (*printf)(const char*) );
  * Set trace mutex wait function
  * By default, trace calls are not thread safe.
  * If thread safety is required this can be used to set a callback function that will be called before each trace call.
- * The specific implementation is up to the application developer, but simple mutex locking is assumed.
+ * The specific implementation is up to the application developer, but the mutex must count so it can
+ * be acquired from a single thread repeatedly.
  */
-void mbed_trace_mutex_wait_function_set(void (*mutex_wait_f)());
+void mbed_trace_mutex_wait_function_set(void (*mutex_wait_f)(void));
 /**
  * Set trace mutex release function
  * By default, trace calls are not thread safe.
  * If thread safety is required this can be used to set a callback function that will be called before returning from
- * each trace call. The specific implementation is up to the application developer, but simple mutex locking is assumed.
+ * each trace call. The specific implementation is up to the application developer, but the mutex must count so it can
+ * be acquired from a single thread repeatedly.
  */
-void mbed_trace_mutex_release_function_set(void (*mutex_release_f)());
+void mbed_trace_mutex_release_function_set(void (*mutex_release_f)(void));
 /**
  * When trace group contains text in filters,
  * trace print will be ignored.
