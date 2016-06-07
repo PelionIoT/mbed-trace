@@ -118,7 +118,8 @@ static trace_t m_trace = {
     .printf  = 0,
     .cmd_printf = 0,
     .mutex_wait_f = 0,
-    .mutex_release_f = 0
+    .mutex_release_f = 0,
+    .mutex_lock_count = 0
 };
 
 int mbed_trace_init(void)
@@ -160,6 +161,7 @@ int mbed_trace_init(void)
     m_trace.cmd_printf = 0;
     m_trace.mutex_wait_f = 0;
     m_trace.mutex_release_f = 0;
+    m_trace.mutex_lock_count = 0;
 
     return 0;
 }
@@ -182,6 +184,7 @@ void mbed_trace_free(void)
     m_trace.cmd_printf = 0;
     m_trace.mutex_wait_f = 0;
     m_trace.mutex_release_f = 0;
+    m_trace.mutex_lock_count = 0;
 }
 static void mbed_trace_realloc( char **buffer, int *length_ptr, int new_length)
 {
