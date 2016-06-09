@@ -333,8 +333,8 @@ TEST(trace, prefix)
 {
   mbed_trace_config_set(TRACE_ACTIVE_LEVEL_ALL);
   mbed_trace_prefix_function_set( &trace_prefix );
-  mbed_tracef(TRACE_LEVEL_DEBUG, "mygr", "test");
-  STRCMP_EQUAL("[<TIME>][DBG ][mygr]: test", buf);
+  mbed_tracef(TRACE_LEVEL_DEBUG, "mygr", "test %d %d", 1, 2);
+  STRCMP_EQUAL("[<TIME>][DBG ][mygr]: test 1 2", buf);
   //TEST_ASSERT_EQUAL_INT(4, time_length);
   
   mbed_trace_config_set(TRACE_ACTIVE_LEVEL_ALL|TRACE_MODE_PLAIN);

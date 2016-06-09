@@ -368,7 +368,10 @@ void mbed_vtracef(uint8_t dlevel, const char* grp, const char *fmt, va_list ap)
             if (bLeft > 0 && m_trace.prefix_f) {
                 //find out length of body
                 size_t sz = 0;
-                sz = vsnprintf(NULL, 0, fmt, ap) + retval + (retval ? 4 : 0);
+                va_list ap2;
+                va_copy(ap2, ap);
+                sz = vsnprintf(NULL, 0, fmt, ap2) + retval + (retval ? 4 : 0);
+                va_end(ap2);
                 //add prefix string
                 retval = snprintf(ptr, bLeft, "%s", m_trace.prefix_f(sz));
                 if (retval >= bLeft) {
