@@ -61,6 +61,10 @@ extern "C" {
 #define YOTTA_CFG_MBED_TRACE_FEA_IPV6 1
 #endif
 
+#ifndef MBED_CONF_MBED_TRACE_ENABLE
+#define MBED_CONF_MBED_TRACE_ENABLE 0
+#endif
+
 /** 3 upper bits are trace modes related,
     and 5 lower bits are trace level configuration */
 
@@ -334,7 +338,7 @@ char* mbed_trace_array(const uint8_t* buf, uint16_t len);
  * If tracing is disabled, the dummies will hide the real functions. The real functions can still be reached by
  * surrounding the name of the function with brackets, e.g. "(mbed_tracef)(dlevel, grp, "like so");"
  * */
-#if defined(FEA_TRACE_SUPPORT) || defined(YOTTA_CFG_MBED_TRACE) || (defined(YOTTA_CFG) && !defined(NDEBUG))
+#if defined(FEA_TRACE_SUPPORT) || MBED_CONF_MBED_TRACE_ENABLE || defined(YOTTA_CFG_MBED_TRACE) || (defined(YOTTA_CFG) && !defined(NDEBUG))
 // undefine dummies, revealing the real functions
 #undef MBED_TRACE_DUMMIES_DEFINED
 #undef mbed_trace_init
