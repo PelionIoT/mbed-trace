@@ -26,7 +26,8 @@ The purpose of the library is to provide a light, simple and general tracing sol
 * The trace function uses `stdout` as the default output target because it goes directly to serial port when initialized. 
 * The trace function produces traces like: `[<levl>][grp ]: msg`. This provides an easy way to detect trace prints and separate traces from normal prints (for example with _regex_).
 * This approach requires a `sprintf` implementation (`stdio.h`). The memory consumption is pretty high, but it allows an efficient way to format traces.
-* The solution is not Thread nor Interrupt safe. (Sorry, but the current implementation does not have mutexes. PRs are more than welcome.)
+* The solution is not Interrupt safe. (PRs are more than welcome.)
+* The solution is not Thread safe by default. Thread safety can be enabled by providing wait and release callback functions that use mutexes defined by the application. 
 
 ## Examples of traces
 
@@ -73,9 +74,16 @@ Set output function, `printf` by default:
 mbed_trace_print_function_set(printf)
 ```
 
+Set mutex wait and release functions, if thread safety is needed
+```c
+mbed_trace_mutex_wait_function_set(my_mutex_wait);
+mbed_trace_mutex_release_function_set(my_mutex_release);
+```
+
 ### Helping functions
 
 The purpose of the helping functions is to provide simple conversions, for example from an array to C string, so that you can print everything to single trace line.
+These must be called inside actual trace calls, e.g. ```tr_debug("My IP6 address: %s", mbed_trace_ipv6(addr));```.
 
 Available conversion functions:
 ```
@@ -94,8 +102,21 @@ See more in [mbed_trace.h](https://github.com/ARMmbed/mbed-trace/blob/master/mbe
 #include "mbed-trace/mbed_trace.h"
 #define TRACE_GROUP  "main"
 
+ // These are only necessary if thread safety is needed
+static Mutex MyMutex;
+static void my_mutex_wait()
+{
+    MyMutex.lock();
+}
+static void my_mutex_release()
+{
+    MyMutex.unlock();
+}
+
 int main(void){
     mbed_trace_init();       // initialize the trace library
+    mbed_trace_mutex_wait_function_set( my_mutex_wait ); // only if thread safety is needed
+    mbed_trace_mutex_release_function_set( my_mutex_release ); // only if thread safety is needed
     tr_debug("this is debug msg");  //-> "[DBG ][main]: this is a debug msg"
     tr_err("this is error msg");    //-> "[ERR ][main]: this is an error msg"
     tr_warn("this is warning msg"); //-> "[WARN][main]: this is a warning msg"
