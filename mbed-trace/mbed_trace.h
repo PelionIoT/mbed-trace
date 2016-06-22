@@ -339,6 +339,10 @@ char* mbed_trace_array(const uint8_t* buf, uint16_t len);
  * surrounding the name of the function with brackets, e.g. "(mbed_tracef)(dlevel, grp, "like so");"
  * */
 #if defined(FEA_TRACE_SUPPORT) || MBED_CONF_MBED_TRACE_ENABLE || defined(YOTTA_CFG_MBED_TRACE) || (defined(YOTTA_CFG) && !defined(NDEBUG))
+// Make sure FEA_TRACE_SUPPORT is always set whenever traces are enabled.
+#ifndef FEA_TRACE_SUPPORT
+#define FEA_TRACE_SUPPORT
+#endif
 // undefine dummies, revealing the real functions
 #undef MBED_TRACE_DUMMIES_DEFINED
 #undef mbed_trace_init
