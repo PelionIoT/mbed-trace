@@ -58,8 +58,11 @@
 #define DEFAULT_TRACE_LINE_LENGTH         1024
 #endif
 /** default max temporary buffer size in bytes, used in
-    trace_ipv6, trace_array and trace_strn */
-#ifdef YOTTA_CFG_MTRACE_TMP_LINE_LEN
+    trace_ipv6, trace_ipv6_prefix and trace_array */
+#ifdef YOTTA_CFG_MBED_TRACE_TMP_LINE_LEN
+#define DEFAULT_TRACE_TMP_LINE_LEN        YOTTA_CFG_MBED_TRACE_TMP_LINE_LEN
+#elif defined YOTTA_CFG_MTRACE_TMP_LINE_LEN
+#warning The YOTTA_CFG_MTRACE_TMP_LINE_LEN flag is deprecated! Use YOTTA_CFG_MBED_TRACE_TMP_LINE_LEN instead.
 #define DEFAULT_TRACE_TMP_LINE_LEN        YOTTA_CFG_MTRACE_TMP_LINE_LEN
 #else
 #define DEFAULT_TRACE_TMP_LINE_LEN        128
