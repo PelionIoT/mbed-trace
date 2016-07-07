@@ -31,6 +31,6 @@
     }
   },
   "dependencies": {
-    "nanostack-libservice": "^3.5.2"
+    "nanostack-libservice": "^3.6.0"
   }
 }

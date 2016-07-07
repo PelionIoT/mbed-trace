@@ -491,8 +491,7 @@ char *mbed_trace_ipv6(const void *addr_ptr)
         return "<null>";
     }
     str[0] = 0;
-    ip6tos(addr_ptr, str);
-    m_trace.tmp_data_ptr += strlen(str) + 1;
+    m_trace.tmp_data_ptr += ip6tos(addr_ptr, str) + 1;
     return str;
 }
 char *mbed_trace_ipv6_prefix(const uint8_t *prefix, uint8_t prefix_len)
@@ -503,31 +502,18 @@ char *mbed_trace_ipv6_prefix(const uint8_t *prefix, uint8_t prefix_len)
         m_trace.mutex_lock_count++;
     }
     char *str = m_trace.tmp_data_ptr;
-    int retval, bLeft = tmp_data_left();
-    char tmp[40];
-    uint8_t addr[16] = {0};
-
     if (str == NULL) {
         return "";
     }
-    if (bLeft < 45) {
+    if (tmp_data_left() < 45) {
         return "";
     }
 
-    if (prefix_len != 0) {
-        if (prefix == NULL || prefix_len > 128) {
-            return "<err>";
-        }
-        bitcopy(addr, prefix, prefix_len);
+    if ((prefix_len != 0 && prefix == NULL) || prefix_len > 128) {
+        return "<err>";
     }
 
-    ip6tos(addr, tmp);
-    retval = snprintf(str, bLeft, "%s/%u", tmp, prefix_len);
-    if (retval <= 0 || retval > bLeft) {
-        return "";
-    }
-
-    m_trace.tmp_data_ptr += retval + 1;
+    m_trace.tmp_data_ptr += ip6_prefix_tos(prefix, prefix_len, str) + 1;
     return str;
 }
 #endif //YOTTA_CFG_MBED_TRACE_FEA_IPV6
