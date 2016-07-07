@@ -9,10 +9,12 @@ extern "C" {
 
 #include <inttypes.h>
 
-extern const char *ip6tos_output_string;
-extern uint8_t ip6tos_input_array[16];
+typedef struct {
+    const char *output_string;
+    uint8_t input_array[16];
+} ip6tos_stub_def_t;
 
-void ip6tos(const void *ip6addr, char *p);
+extern ip6tos_stub_def_t ip6tos_stub;
 
 #ifdef __cplusplus
 }

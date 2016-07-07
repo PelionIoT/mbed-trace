@@ -2,7 +2,7 @@
 if(DEFINED TARGET_LIKE_X86_WINDOWS_NATIVE OR DEFINED TARGET_LIKE_X86_LINUX_NATIVE)
     
     # describe the test executable
-    add_executable(mbed_trace_test EXCLUDE_FROM_ALL Test.cpp stubs/common_functions_stub.c stubs/ip6tos_stub.c)
+    add_executable(mbed_trace_test EXCLUDE_FROM_ALL Test.cpp stubs/ip6tos_stub.c)
     
     include_directories("../yotta_modules/cpputest" "./stubs")
     

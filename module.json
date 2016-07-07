@@ -24,10 +24,12 @@
   ],
   "testTargetDependencies": {
     "x86-linux-native": {
-      "cpputest": "ARMmbed/cpputest"
+      "cpputest": "ARMmbed/cpputest",
+      "nanostack-libservice": "^3.6.0"
     },
     "x86-windows-native": {
-      "cpputest": "ARMmbed/cpputest"
+      "cpputest": "ARMmbed/cpputest",
+      "nanostack-libservice": "^3.6.0"
     }
   },
   "dependencies": {
