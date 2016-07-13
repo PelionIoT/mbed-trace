@@ -14,7 +14,7 @@
 #include "mbed-cpputest/CppUTest/SimpleString.h"
 #include "mbed-cpputest/CppUTest/CommandLineTestRunner.h"
 
-#define YOTTA_CFG_MBED_TRACE
+#define YOTTA_CFG_MBED_TRACE 1
 #define YOTTA_CFG_MBED_TRACE_FEA_IPV6 1
 
 #include "mbed-trace/mbed_trace.h"

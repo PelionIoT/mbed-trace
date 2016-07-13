@@ -44,7 +44,7 @@ The purpose of the library is to provide a light, simple and general tracing sol
 
 * Initialize the serial port so that `stdout` works. You can verify that the serial port works using the `printf()` function.
  * if you want to redirect the traces somewhere else, see the [trace API](https://github.com/ARMmbed/mbed-trace/blob/master/mbed-trace/mbed_trace.h#L170).
-* to activate traces, configure yotta with flag: `YOTTA_CFG_MBED_TRACE`
+* to activate traces, configure yotta with flag: `YOTTA_CFG_MBED_TRACE` set to 1 or true. Setting the flag to 0 or false disables tracing.
  * By default trace uses 1024 bytes buffer for trace lines, but it can be configure by yotta with: `YOTTA_CFG_MBED_TRACE_LINE_LENGTH`. Default length: 1024.
  * To disable ipv6 convertion, set `YOTTA_CFG_MBED_TRACE_FEA_IPV6 = 0` from yotta configurations.
 * Call the trace initialization (`mbed_trace_init`) once before using any other APIs. It allocates the trace buffer and initializes the internal variables.
@@ -98,7 +98,7 @@ See more in [mbed_trace.h](https://github.com/ARMmbed/mbed-trace/blob/master/mbe
 ## Usage example:
 
 ```c++
-#define YOTTA_CFG_MBED_TRACE //this can be defined also in the yotta configuration file config.yml
+#define YOTTA_CFG_MBED_TRACE 1 //this can be defined also in the yotta configuration file config.json
 #include "mbed-trace/mbed_trace.h"
 #define TRACE_GROUP  "main"
 
