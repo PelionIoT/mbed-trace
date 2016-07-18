@@ -162,9 +162,6 @@ int mbed_trace_init(void)
     m_trace.suffix_f = 0;
     m_trace.printf = mbed_trace_default_print;
     m_trace.cmd_printf = 0;
-    m_trace.mutex_wait_f = 0;
-    m_trace.mutex_release_f = 0;
-    m_trace.mutex_lock_count = 0;
 
     return 0;
 }

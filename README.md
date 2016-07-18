@@ -74,7 +74,7 @@ Set output function, `printf` by default:
 mbed_trace_print_function_set(printf)
 ```
 
-Set mutex wait and release functions, if thread safety is needed
+Set mutex wait and release functions, if thread safety is needed. Do this before initialization so the functions are immediately available.
 ```c
 mbed_trace_mutex_wait_function_set(my_mutex_wait);
 mbed_trace_mutex_release_function_set(my_mutex_release);
@@ -114,9 +114,9 @@ static void my_mutex_release()
 }
 
 int main(void){
-    mbed_trace_init();       // initialize the trace library
     mbed_trace_mutex_wait_function_set( my_mutex_wait ); // only if thread safety is needed
     mbed_trace_mutex_release_function_set( my_mutex_release ); // only if thread safety is needed
+    mbed_trace_init();       // initialize the trace library
     tr_debug("this is debug msg");  //-> "[DBG ][main]: this is a debug msg"
     tr_err("this is error msg");    //-> "[ERR ][main]: this is an error msg"
     tr_warn("this is warning msg"); //-> "[WARN][main]: this is a warning msg"
