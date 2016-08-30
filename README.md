@@ -133,6 +133,36 @@ int main(void){
 }
 ```
 
+## Enabling traces in mbed OS 5
+
+To enable traces in mbed OS 5, add the following to your ``mbed_app.json``:
+
+```json
+{
+   "target_overrides": {
+      "*": {
+         "mbed-trace.enable": 1
+      }
+   }
+}
+```
+
+Then instantiate the tracing module, and forward data to stdout by adding the following to your ``main.cpp``:
+
+```cpp
+#include "mbed-trace/mbed_trace.h"
+
+void trace_printer(const char* str) {
+   printf("%s\r\n", str);
+}
+
+int main() {
+   mbed_trace_init();
+   mbed_trace_print_function_set(trace_printer);
+
+   /* rest of the program */
+```
+
 ## Unit tests
 
 To run unit tests:
