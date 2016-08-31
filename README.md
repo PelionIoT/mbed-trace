@@ -44,12 +44,33 @@ The purpose of the library is to provide a light, simple and general tracing sol
 
 * Initialize the serial port so that `stdout` works. You can verify that the serial port works using the `printf()` function.
     * if you want to redirect the traces somewhere else, see the [trace API](https://github.com/ARMmbed/mbed-trace/blob/master/mbed-trace/mbed_trace.h#L170).
-* To activate traces, set `YOTTA_CFG_MBED_TRACE` to 1 or true. Setting the flag to 0 or false disables tracing.
+* To activate traces:
+    * With yotta: set `YOTTA_CFG_MBED_TRACE` to 1 or true. Setting the flag to 0 or false disables tracing.
+    * [With mbed OS 5](#enabling-traces-in-mbed-os-5)
 * By default, trace uses 1024 bytes buffer for trace lines, but you can change it by yotta with: `YOTTA_CFG_MBED_TRACE_LINE_LENGTH`.
 * To disable the IPv6 conversion, set `YOTTA_CFG_MBED_TRACE_FEA_IPV6 = 0`.
 * If thread safety is needed, configure the wait and release callback functions before initialization to enable the protection. Usually, this needs to be done only once in the application's lifetime.
 * Call the trace initialization (`mbed_trace_init`) once before using any other APIs. It allocates the trace buffer and initializes the internal variables.
 * Define `TRACE_GROUP` in your source code (not in the header!) to use traces. It is a 1-4 characters long char-array (for example `#define TRACE_GROUP "APPL"`). This will be printed on every trace line.
+
+### Enabling traces in mbed OS 5
+
+To enable traces in mbed OS 5, you need to add the feature COMMON_PAL into the build and enable the trace library.
+
+To do so, add the following to your mbed_app.json:
+
+```json
+{
+    "target_overrides": {
+        "*": {
+            "target.features_add": ["COMMON_PAL"],
+            "mbed-trace.enable": 1
+        }
+    }
+}
+```
+
+([Click here for more information on the configuration system](https://github.com/ARMmbed/mbed-os/blob/master/docs/config_system.md))
 
 ### Traces
 
