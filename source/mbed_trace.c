@@ -456,12 +456,14 @@ end:
     if ( m_trace.mutex_release_f ) {
         // Store the mutex lock count to temp variable so that it won't get
         // clobbered during last loop iteration when mutex gets released
-        int temp_mutex_lock_count = m_trace.mutex_lock_count;
+        int count = m_trace.mutex_lock_count;
         m_trace.mutex_lock_count = 0;
-        while (temp_mutex_lock_count > 0) {
-            temp_mutex_lock_count--;
+        // Release mutex as many times as it was acquired because helper functions,
+        // eg. mbed_trace_array() that can be used for formatting arguments, only
+        // lock it but don't release it
+        do {
             m_trace.mutex_release_f();
-        }
+        } while (--count > 0);
     }
 }
 static void mbed_trace_reset_tmp(void)
