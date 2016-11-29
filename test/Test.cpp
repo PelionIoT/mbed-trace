@@ -140,6 +140,26 @@ TEST(trace, BufferResize)
     STRCMP_EQUAL(expectedStr, buf);
 }
 
+TEST(trace, PreInitConfiguration)
+{
+    uint8_t arr[20] = {0};
+    memset(arr, '0', 20);
+
+    mbed_trace_free();
+    mbed_trace_config_set(TRACE_MODE_PLAIN|TRACE_ACTIVE_LEVEL_ALL);
+    mbed_trace_print_function_set( myprint );
+    mbed_trace_buffer_sizes(11, 10);
+    mbed_trace_mutex_wait_function_set( my_mutex_wait );
+    mbed_trace_mutex_release_function_set( my_mutex_release );
+    mbed_trace_init();
+
+    STRCMP_EQUAL("30:30:30*", mbed_trace_array(arr, 20));
+
+    const char * expectedStr = "0123456789";
+    mbed_tracef(TRACE_LEVEL_DEBUG, "mygr", "01234567890123456789");
+    STRCMP_EQUAL(expectedStr, buf);
+}
+
 #if YOTTA_CFG_MBED_TRACE_FEA_IPV6 == 1
 ip6tos_stub_def_t ip6tos_stub; // extern variable
 
