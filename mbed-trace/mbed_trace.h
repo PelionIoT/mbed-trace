@@ -64,10 +64,17 @@ extern "C" {
 
 #ifndef YOTTA_CFG_MBED_TRACE_FEA_IPV6
 #define YOTTA_CFG_MBED_TRACE_FEA_IPV6 1
+#else
+#warning YOTTA_CFG_MBED_TRACE_FEA_IPV6 is deprecated and will be removed in the future! Use MBED_CONF_MBED_TRACE_FEA_IPV6 instead.
+#define MBED_CONF_MBED_TRACE_FEA_IPV6 YOTTA_CFG_MBED_TRACE_FEA_IPV6
 #endif
 
 #ifndef MBED_CONF_MBED_TRACE_ENABLE
 #define MBED_CONF_MBED_TRACE_ENABLE 0
+#endif
+
+#ifndef MBED_CONF_MBED_TRACE_FEA_IPV6
+#define MBED_CONF_MBED_TRACE_FEA_IPV6 1
 #endif
 
 /** 3 upper bits are trace modes related,
@@ -321,7 +328,7 @@ void mbed_vtracef(uint8_t dlevel, const char* grp, const char *fmt, va_list ap);
  *  Get last trace from buffer
  */
 const char* mbed_trace_last(void);
-#if YOTTA_CFG_MBED_TRACE_FEA_IPV6 == 1
+#if MBED_CONF_MBED_TRACE_FEA_IPV6 == 1
 /**
  * mbed_tracef helping function for convert ipv6
  * table to human readable string.

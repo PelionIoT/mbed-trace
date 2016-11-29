@@ -17,13 +17,16 @@
 #include <string.h>
 #include <stdarg.h>
 
-#ifndef YOTTA_CFG_MBED_TRACE
-#define YOTTA_CFG_MBED_TRACE 1
-#define YOTTA_CFG_MBED_TRACE_FEA_IPV6 1
+#ifdef MBED_CONF_MBED_TRACE_ENABLE
+#undef MBED_CONF_MBED_TRACE_ENABLE
+#endif
+#define MBED_CONF_MBED_TRACE_ENABLE 1
+#ifndef MBED_CONF_MBED_TRACE_FEA_IPV6
+#define MBED_CONF_MBED_TRACE_FEA_IPV6 1
 #endif
 
 #include "mbed-trace/mbed_trace.h"
-#if YOTTA_CFG_MBED_TRACE_FEA_IPV6 == 1
+#if MBED_CONF_MBED_TRACE_FEA_IPV6 == 1
 #include "mbed-client-libservice/ip6string.h"
 #include "mbed-client-libservice/common_functions.h"
 #endif
@@ -487,7 +490,7 @@ const char *mbed_trace_last(void)
 }
 /* Helping functions */
 #define tmp_data_left()  m_trace.tmp_data_length-(m_trace.tmp_data_ptr-m_trace.tmp_data)
-#if YOTTA_CFG_MBED_TRACE_FEA_IPV6 == 1
+#if MBED_CONF_MBED_TRACE_FEA_IPV6 == 1
 char *mbed_trace_ipv6(const void *addr_ptr)
 {
     /** Acquire mutex. It is released before returning from mbed_vtracef. */
@@ -531,7 +534,7 @@ char *mbed_trace_ipv6_prefix(const uint8_t *prefix, uint8_t prefix_len)
     m_trace.tmp_data_ptr += ip6_prefix_tos(prefix, prefix_len, str) + 1;
     return str;
 }
-#endif //YOTTA_CFG_MBED_TRACE_FEA_IPV6
+#endif //MBED_CONF_MBED_TRACE_FEA_IPV6
 char *mbed_trace_array(const uint8_t *buf, uint16_t len)
 {
     /** Acquire mutex. It is released before returning from mbed_vtracef. */
