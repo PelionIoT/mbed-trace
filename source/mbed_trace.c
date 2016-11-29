@@ -55,23 +55,36 @@
 #define VT100_COLOR_DEBUG "\x1b[90m"
 
 /** default max trace line size in bytes */
-#ifdef YOTTA_CFG_MBED_TRACE_LINE_LENGTH
+#ifdef MBED_TRACE_LINE_LENGTH
+#define DEFAULT_TRACE_LINE_LENGTH         MBED_TRACE_LINE_LENGTH
+#elif defined YOTTA_CFG_MBED_TRACE_LINE_LENGTH
+#warning YOTTA_CFG_MBED_TRACE_LINE_LENGTH is deprecated and will be removed in the future! Use MBED_TRACE_LINE_LENGTH instead.
 #define DEFAULT_TRACE_LINE_LENGTH         YOTTA_CFG_MBED_TRACE_LINE_LENGTH
 #else
 #define DEFAULT_TRACE_LINE_LENGTH         1024
 #endif
+
 /** default max temporary buffer size in bytes, used in
     trace_ipv6, trace_ipv6_prefix and trace_array */
-#ifdef YOTTA_CFG_MBED_TRACE_TMP_LINE_LEN
+#ifdef MBED_TRACE_TMP_LINE_LENGTH
+#define DEFAULT_TRACE_TMP_LINE_LEN        MBED_TRACE_TMP_LINE_LENGTH
+#elif defined YOTTA_CFG_MBED_TRACE_TMP_LINE_LEN
+#warning The YOTTA_CFG_MBED_TRACE_TMP_LINE_LEN flag is deprecated and will be removed in the future! Use MBED_TRACE_TMP_LINE_LENGTH instead.
 #define DEFAULT_TRACE_TMP_LINE_LEN        YOTTA_CFG_MBED_TRACE_TMP_LINE_LEN
 #elif defined YOTTA_CFG_MTRACE_TMP_LINE_LEN
-#warning The YOTTA_CFG_MTRACE_TMP_LINE_LEN flag is deprecated! Use YOTTA_CFG_MBED_TRACE_TMP_LINE_LEN instead.
+#warning The YOTTA_CFG_MTRACE_TMP_LINE_LEN flag is deprecated and will be removed in the future! Use MBED_TRACE_TMP_LINE_LENGTH instead.
 #define DEFAULT_TRACE_TMP_LINE_LEN        YOTTA_CFG_MTRACE_TMP_LINE_LEN
 #else
 #define DEFAULT_TRACE_TMP_LINE_LEN        128
 #endif
+
 /** default max filters (include/exclude) length in bytes */
+#ifdef MBED_TRACE_FILTER_LENGTH
+#define DEFAULT_TRACE_FILTER_LENGTH       MBED_TRACE_FILTER_LENGTH
+#else
 #define DEFAULT_TRACE_FILTER_LENGTH       24
+#endif
+
 /** default trace configuration bitmask */
 #ifdef MBED_TRACE_CONFIG
 #define DEFAULT_TRACE_CONFIG              MBED_TRACE_CONFIG
