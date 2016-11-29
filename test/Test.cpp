@@ -118,6 +118,7 @@ TEST(trace, BufferResize)
 {
     uint8_t arr[20] = {0};
     memset(arr, '0', 20);
+
     mbed_trace_buffer_sizes(0, 10);
     STRCMP_EQUAL("30:30:30*", mbed_trace_array(arr, 20));
     mbed_trace_buffer_sizes(0, 15);
@@ -125,7 +126,18 @@ TEST(trace, BufferResize)
     mbed_trace_buffer_sizes(0, 15);
     STRCMP_EQUAL("30:30:30:30", mbed_trace_array(arr, 4));
 
-    mbed_tracef(TRACE_LEVEL_DEBUG, "mygr", "flush buffers and locks");
+    const char * expectedStr = "0123456789";
+    mbed_trace_buffer_sizes(11, 0);
+    mbed_tracef(TRACE_LEVEL_DEBUG, "mygr", "01234567890123456789");
+    STRCMP_EQUAL(expectedStr, buf);
+    expectedStr = "012345678901234";
+    mbed_trace_buffer_sizes(16, 0);
+    mbed_tracef(TRACE_LEVEL_DEBUG, "mygr", "01234567890123456789");
+    STRCMP_EQUAL(expectedStr, buf);
+    expectedStr = "012345678901234";
+    mbed_trace_buffer_sizes(16, 0);
+    mbed_tracef(TRACE_LEVEL_DEBUG, "mygr", "012345678901234");
+    STRCMP_EQUAL(expectedStr, buf);
 }
 
 #if YOTTA_CFG_MBED_TRACE_FEA_IPV6 == 1
