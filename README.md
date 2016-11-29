@@ -47,8 +47,10 @@ The purpose of the library is to provide a light, simple and general tracing sol
 * To enable the tracing API:
     * With yotta: set `YOTTA_CFG_MBED_TRACE` to 1 or true. Setting the flag to 0 or false disables tracing.
     * [With mbed OS 5](#enabling-the-tracing-api-in-mbed-os-5)
-* By default, trace uses 1024 bytes buffer for trace lines, but you can change it by yotta with: `YOTTA_CFG_MBED_TRACE_LINE_LENGTH`.
-* To disable the IPv6 conversion, set `YOTTA_CFG_MBED_TRACE_FEA_IPV6 = 0`.
+* By default, trace uses 1024 bytes buffer for trace lines, but you can change it by setting the configuration macro `MBED_TRACE_LINE_LENGTH` to the desired value.
+* To disable the IPv6 conversion:
+    * With yotta: set `YOTTA_CFG_MBED_TRACE_FEA_IPV6 = 0`.
+    * With mbed OS 5: set `MBED_CONF_MBED_TRACE_FEA_IPV6 = 0`.
 * If thread safety is needed, configure the wait and release callback functions before initialization to enable the protection. Usually, this needs to be done only once in the application's lifetime.
 * Call the trace initialization (`mbed_trace_init`) once before using any other APIs. It allocates the trace buffer and initializes the internal variables.
 * Define `TRACE_GROUP` in your source code (not in the header!) to use traces. It is a 1-4 characters long char-array (for example `#define TRACE_GROUP "APPL"`). This will be printed on every trace line.
@@ -128,7 +130,7 @@ See more in [mbed_trace.h](https://github.com/ARMmbed/mbed-trace/blob/master/mbe
 ## Usage example:
 
 ```c++
-#define YOTTA_CFG_MBED_TRACE 1 //this can be defined also in the yotta configuration file config.json
+#define MBED_CONF_MBED_TRACE_ENABLE 1 //this could be defined also in the mbed-cli configuration file mbed_app.json
 #include "mbed-trace/mbed_trace.h"
 #define TRACE_GROUP  "main"
 
