@@ -84,9 +84,9 @@ When you want to print traces, use the `tr_<level>` macros. The macros behave li
 Available levels:
 
 * debug
+* info
 * warning
 * error
-* info
 * cmdline (special behavior, should not be used)
 
 For the thread safety, set the mutex wait and release functions. You need do this before the initialization to have the functions available right away:
