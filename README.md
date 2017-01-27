@@ -33,9 +33,9 @@ The purpose of the library is to provide a light, simple and general tracing sol
 
 ```
 [DBG ][abc ]: This is a debug message from module abc<cr><lf>
-[ERR ][abc ]: Something goes wrong in module abc<cr><lf>
-[WARN][br  ]: Oh no, br warning occurs!<cr><lf>
 [INFO][br  ]: Hi there.<cr><lf>
+[WARN][br  ]: Oh no, br warning occurs!<cr><lf>
+[ERR ][abc ]: Something goes wrong in module abc<cr><lf>
 ```
 
 ## Usage
@@ -151,8 +151,8 @@ int main(void){
     mbed_trace_init();       // initialize the trace library
     tr_debug("this is debug msg");  //-> "[DBG ][main]: this is a debug msg"
     tr_info("this is info msg");    //-> "[INFO][main]: this is an info msg"
-    tr_err("this is error msg");    //-> "[ERR ][main]: this is an error msg"
     tr_warn("this is warning msg"); //-> "[WARN][main]: this is a warning msg"
+    tr_err("this is error msg");    //-> "[ERR ][main]: this is an error msg"
     char arr[] = {30, 31, 32};
     tr_debug("printing array: %s", mbed_trace_array(arr, 3)); //-> "[DBG ][main]: printing array: 01:02:03"
     return 0;
