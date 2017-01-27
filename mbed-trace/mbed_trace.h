@@ -31,8 +31,8 @@
  *          mbed_trace_init();   // initialize trace library
  *          tr_debug("this is debug msg");  //print debug message to stdout: "[DBG]
  *          tr_info("this is info msg");
- *          tr_err("this is error msg");
  *          tr_warn("this is warning msg");
+ *          tr_err("this is error msg");
  *          return 0;
  *      }
  * \endcode
