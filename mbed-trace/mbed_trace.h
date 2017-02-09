@@ -63,18 +63,18 @@ extern "C" {
 #endif
 
 #ifndef YOTTA_CFG_MBED_TRACE_FEA_IPV6
-#define YOTTA_CFG_MBED_TRACE_FEA_IPV6 1
+#define YOTTA_CFG_MBED_TRACE_FEA_IPV6 0
 #else
 #warning YOTTA_CFG_MBED_TRACE_FEA_IPV6 is deprecated and will be removed in the future! Use MBED_CONF_MBED_TRACE_FEA_IPV6 instead.
 #define MBED_CONF_MBED_TRACE_FEA_IPV6 YOTTA_CFG_MBED_TRACE_FEA_IPV6
 #endif
 
 #ifndef MBED_CONF_MBED_TRACE_ENABLE
-#define MBED_CONF_MBED_TRACE_ENABLE 0
+#define MBED_CONF_MBED_TRACE_ENABLE 1
 #endif
 
 #ifndef MBED_CONF_MBED_TRACE_FEA_IPV6
-#define MBED_CONF_MBED_TRACE_FEA_IPV6 1
+#define MBED_CONF_MBED_TRACE_FEA_IPV6 0
 #endif
 
 /** 3 upper bits are trace modes related,
