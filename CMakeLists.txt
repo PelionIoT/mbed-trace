@@ -12,10 +12,10 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../nanostack-libservice/mbed-cli
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../nanostack-libservice/)
 
 
-FILE(GLOB NANO_STACK_LIB_SERVICE_SRC
+FILE(GLOB MBED_TRACE_SRC
 	"${CMAKE_CURRENT_SOURCE_DIR}/source/*.c"
 
 	)
 
-CREATE_LIBRARY(mbedTrace "${NANO_STACK_LIB_SERVICE_SRC}" "")
+CREATE_LIBRARY(mbedTrace "${MBED_TRACE_SRC}" "")
 
