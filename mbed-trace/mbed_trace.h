@@ -48,7 +48,9 @@
 extern "C" {
 #endif
 
-#ifdef YOTTA_CFG
+
+
+#if defined(YOTTA_CFG) || defined(MBEDTRACE_USE_STD_LIBS)
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>

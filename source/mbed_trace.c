@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
+#include <inttypes.h>
 
 #ifdef MBED_CONF_MBED_TRACE_ENABLE
 #undef MBED_CONF_MBED_TRACE_ENABLE
@@ -26,10 +27,7 @@
 #endif
 
 #include "mbed-trace/mbed_trace.h"
-#if MBED_CONF_MBED_TRACE_FEA_IPV6 == 1
-#include "mbed-client-libservice/ip6string.h"
-#include "mbed-client-libservice/common_functions.h"
-#endif
+
 
 #if defined(YOTTA_CFG_MBED_TRACE_MEM)
 #define MBED_TRACE_MEM_INCLUDE      YOTTA_CFG_MBED_TRACE_MEM_INCLUDE
@@ -150,6 +148,134 @@ static trace_t m_trace = {
     .mutex_release_f = 0,
     .mutex_lock_count = 0
 };
+
+
+
+
+/************************************************************************************************
+ * adding ipv6 API
+ ************************************************************************************************/
+#if ((MBED_CONF_MBED_TRACE_FEA_IPV6 == 1) && defined(MBEDTRACE_USE_STD_LIBS))
+
+#define IPV6_TO_STR ip6toString
+#define IPV6_PREFIX_TO STR ip6_prefix_toString
+
+uint8_t *bitCpy(uint8_t *restrict dst, const uint8_t *restrict src, uint_fast8_t bits)
+{
+    uint_fast8_t bytes = bits / 8;
+    bits %= 8;
+
+    if (bytes) {
+        dst = (uint8_t *) memcpy(dst, src, bytes) + bytes;
+        src += bytes;
+    }
+
+    if (bits) {
+        uint_fast8_t split_bit = context_split_mask(bits);
+        *dst = (*src & split_bit) | (*dst & ~ split_bit);
+    }
+
+    return dst;
+}
+
+
+static uint_fast8_t ip6toString(const void *ip6addr, char *p)
+{
+    char *p_orig = p;
+    uint_fast8_t zero_start = 255, zero_len = 1;
+    const uint8_t *addr = ip6addr;
+    uint_fast16_t part;
+
+    /* Follow RFC 5952 - pre-scan for longest run of zeros */
+    for (uint_fast8_t n = 0; n < 8; n++) {
+        part = *addr++;
+        part = (part << 8) | *addr++;
+        if (part != 0) {
+            continue;
+        }
+
+        /* We're at the start of a run of zeros - scan to non-zero (or end) */
+        uint_fast8_t n0 = n;
+        for (n = n0 + 1; n < 8; n++) {
+            part = *addr++;
+            part = (part << 8) | *addr++;
+            if (part != 0) {
+                break;
+            }
+        }
+
+        /* Now n0->initial zero of run, n->after final zero in run. Is this the
+         * longest run yet? If equal, we stick with the previous one - RFC 5952
+         * S4.2.3. Note that zero_len being initialised to 1 stops us
+         * shortening a 1-part run (S4.2.2.)
+         */
+        if (n - n0 > zero_len) {
+            zero_start = n0;
+            zero_len = n - n0;
+        }
+
+        /* Continue scan for initial zeros from part n+1 - we've already
+         * consumed part n, and know it's non-zero. */
+    }
+
+    /* Now go back and print, jumping over any zero run */
+    addr = ip6addr;
+    for (uint_fast8_t n = 0; n < 8;) {
+        if (n == zero_start) {
+            if (n == 0) {
+                *p++ = ':';
+            }
+            *p++ = ':';
+            addr += 2 * zero_len;
+            n += zero_len;
+            continue;
+        }
+
+        part = *addr++;
+        part = (part << 8) | *addr++;
+        n++;
+
+        p += sprintf(p, "%"PRIxFAST16, part);
+
+        /* One iteration writes "part:" rather than ":part", and has the
+         * explicit check for n == 8 below, to allow easy extension for
+         * IPv4-in-IPv6-type addresses ("xxxx::xxxx:a.b.c.d"): we'd just
+         * run the same loop for 6 parts, and output would then finish with the
+         * required : or ::, ready for "a.b.c.d" to be tacked on.
+         */
+        if (n != 8) {
+            *p++ = ':';
+        }
+    }
+    *p = '\0';
+
+    // Return length of generated string, excluding the terminating null character
+    return p - p_orig;
+}
+
+static uint_fast8_t ip6_prefix_toString(const void *prefix, uint_fast8_t prefix_len, char *p)
+{
+    char *wptr = p;
+    uint8_t addr[16] = {0};
+
+    if (prefix_len > 128) {
+        return 0;
+    }
+
+    // Generate prefix part of the string
+    bitCpy(addr, prefix, prefix_len);
+    wptr += IPV6_TO_STR(addr, wptr);
+    // Add the prefix length part of the string
+    wptr += sprintf(wptr, "/%"PRIuFAST8, prefix_len);
+
+    // Return total length of generated string
+    return wptr - p;
+}
+#else
+#define IPV6_TO_STR ip6tos
+#define IPV6_PREFIX_TO_STR ip6_prefix_tos
+#endif
+
 
 int mbed_trace_init(void)
 {
@@ -522,7 +648,7 @@ char *mbed_trace_ipv6(const void *addr_ptr)
         return "<null>";
     }
     str[0] = 0;
-    m_trace.tmp_data_ptr += ip6tos(addr_ptr, str) + 1;
+    m_trace.tmp_data_ptr += IPV6_TO_STR(addr_ptr, str) + 1;
     return str;
 }
 char *mbed_trace_ipv6_prefix(const uint8_t *prefix, uint8_t prefix_len)
@@ -544,7 +670,7 @@ char *mbed_trace_ipv6_prefix(const uint8_t *prefix, uint8_t prefix_len)
         return "<err>";
     }
 
-    m_trace.tmp_data_ptr += ip6_prefix_tos(prefix, prefix_len, str) + 1;
+    m_trace.tmp_data_ptr += IPV6_PREFIX_TO_STR(prefix, prefix_len, str) + 1;
     return str;
 }
 #endif //MBED_CONF_MBED_TRACE_FEA_IPV6
@@ -593,3 +719,4 @@ char *mbed_trace_array(const uint8_t *buf, uint16_t len)
     m_trace.tmp_data_ptr = wptr;
     return str;
 }
+
