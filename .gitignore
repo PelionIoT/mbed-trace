@@ -36,3 +36,4 @@ build/
 test_coverage/
 **/*.info
 **/*~
+output/*
