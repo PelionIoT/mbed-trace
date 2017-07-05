@@ -37,3 +37,6 @@ test_coverage/
 **/*.info
 **/*~
 output/*
+
+# Yotta files
+.yotta.json
