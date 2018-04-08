@@ -94,7 +94,7 @@
 
 /** default print function, just redirect str to printf */
 static void mbed_trace_realloc( char **buffer, int *length_ptr, int new_length);
-static void mbed_trace_default_print(const char *str);
+static int mbed_trace_default_fputs(const char* input, FILE* _);
 static void mbed_trace_reset_tmp(void);
 
 typedef struct trace_s {
@@ -116,13 +116,16 @@ typedef struct trace_s {
     int tmp_data_length;
     /** temporary data pointer */
     char *tmp_data_ptr;
-
+    /** File stream for writing */
+    FILE *stream;
     /** prefix function, which can be used to put time to the trace line */
     char *(*prefix_f)(size_t);
     /** suffix function, which can be used to some string to the end of trace line */
     char *(*suffix_f)(void);
-    /** print out function. Can be redirect to flash for example. */
-    void (*printf)(const char *);
+    /** print out wrapper function. */
+    void (*puts)(const char *);
+    /** stream out function. Can be redirect to flash for example. */
+    int (*fputs)(const char *, FILE*);
     /** print out function for TRACE_LEVEL_CMD */
     void (*cmd_printf)(const char *);
     /** mutex wait function which can be called to lock against a mutex. */
@@ -144,7 +147,9 @@ static trace_t m_trace = {
     .tmp_data_length = DEFAULT_TRACE_TMP_LINE_LEN,
     .prefix_f = 0,
     .suffix_f = 0,
-    .printf  = mbed_trace_default_print,
+    .stream = 0,
+    .puts = 0,
+    .fputs  = fputs,
     .cmd_printf = 0,
     .mutex_wait_f = 0,
     .mutex_release_f = 0,
@@ -161,6 +166,7 @@ int mbed_trace_init(void)
         m_trace.tmp_data = MBED_TRACE_MEM_ALLOC(m_trace.tmp_data_length);
     }
     m_trace.tmp_data_ptr = m_trace.tmp_data;
+    m_trace.stream = stdout;
 
     if (m_trace.filters_exclude == NULL) {
         m_trace.filters_exclude = MBED_TRACE_MEM_ALLOC(m_trace.filters_length);
@@ -203,7 +209,8 @@ void mbed_trace_free(void)
     m_trace.tmp_data_length = DEFAULT_TRACE_TMP_LINE_LEN;
     m_trace.prefix_f = 0;
     m_trace.suffix_f = 0;
-    m_trace.printf  = mbed_trace_default_print;
+    m_trace.puts = 0;
+    m_trace.fputs  = 0;
     m_trace.cmd_printf = 0;
     m_trace.mutex_wait_f = 0;
     m_trace.mutex_release_f = 0;
@@ -241,9 +248,27 @@ void mbed_trace_suffix_function_set(char *(*suffix_f)(void))
 {
     m_trace.suffix_f = suffix_f;
 }
-void mbed_trace_print_function_set(void (*printf)(const char *))
+static int mbed_trace_default_fputs(const char* input, FILE* _)
 {
-    m_trace.printf = printf;
+    if (m_trace.puts)
+    {
+        m_trace.puts(input);
+        return 0;
+    }
+    return EOF; // missing user defined puts function
+}
+void mbed_trace_print_function_set(void (*puts_f)(const char *))
+{
+    m_trace.puts = puts_f;
+    m_trace.fputs = mbed_trace_default_fputs;
+}
+void mbed_trace_set_pipe(FILE *stream)
+{
+    m_trace.stream = stream ? stream : stdout;
+}
+void mbed_trace_fputs_function_set(int (*fputs_f)(const char *, FILE*))
+{
+    m_trace.fputs = fputs_f ? fputs_f : mbed_trace_default_fputs;
 }
 void mbed_trace_cmdprint_function_set(void (*printf)(const char *))
 {
@@ -300,10 +325,6 @@ static int8_t mbed_trace_skip(int8_t dlevel, const char *grp)
     }
     return 0;
 }
-static void mbed_trace_default_print(const char *str)
-{
-    puts(str);
-}
 void mbed_tracef(uint8_t dlevel, const char *grp, const char *fmt, ...)
 {
     va_list ap;
@@ -324,16 +345,16 @@ void mbed_vtracef(uint8_t dlevel, const char* grp, const char *fmt, va_list ap)
 
     m_trace.line[0] = 0; //by default trace is empty
 
-    if (mbed_trace_skip(dlevel, grp) || fmt == 0 || grp == 0 || !m_trace.printf) {
+    if (mbed_trace_skip(dlevel, grp) || fmt == 0 || grp == 0 || (!m_trace.fputs)) {
         //return tmp data pointer back to the beginning
         mbed_trace_reset_tmp();
         goto end;
     }
+
     if ((m_trace.trace_config & TRACE_MASK_LEVEL) &  dlevel) {
         bool color = (m_trace.trace_config & TRACE_MODE_COLOR) != 0;
         bool plain = (m_trace.trace_config & TRACE_MODE_PLAIN) != 0;
         bool cr    = (m_trace.trace_config & TRACE_CARRIAGE_RETURN) != 0;
-
         int retval = 0, bLeft = m_trace.line_length;
         char *ptr = m_trace.line;
         if (plain == true || dlevel == TRACE_LEVEL_CMD) {
@@ -344,7 +365,7 @@ void mbed_vtracef(uint8_t dlevel, const char* grp, const char *fmt, va_list ap)
                 m_trace.cmd_printf("\n");
             } else {
                 //print out whole data
-                m_trace.printf(m_trace.line);
+                m_trace.fputs(m_trace.line, m_trace.stream);
             }
         } else {
             if (color) {
@@ -464,12 +485,18 @@ void mbed_vtracef(uint8_t dlevel, const char* grp, const char *fmt, va_list ap)
                 }
                 if (retval > 0) {
                     // not used anymore
-                    //ptr += retval;
-                    //bLeft -= retval;
+                    ptr += retval;
+                    bLeft -= retval;
                 }
             }
+            if (retval > 0 && bLeft > 0 && m_trace.fputs != mbed_trace_default_fputs) {
+                // add line feeds when using stdio:fputs streaming.
+                // by default we use custom fputs which behaviours same way than puts
+                // @todo this is a bit hack solution
+                snprintf(ptr, bLeft, "\n");
+            }
             //print out whole data
-            m_trace.printf(m_trace.line);
+            m_trace.fputs(m_trace.line, m_trace.stream);
         }
         //return tmp data pointer back to the beginning
         mbed_trace_reset_tmp();

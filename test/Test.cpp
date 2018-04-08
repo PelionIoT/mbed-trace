@@ -474,6 +474,20 @@ TEST(trace, no_printer)
     mbed_tracef(TRACE_LEVEL_DEBUG, "mygr", "this shoudnt be printed because printer is missing");
     STRCMP_EQUAL("hello", buf);
 }
+TEST(trace, filestream)
+{
+    mbed_trace_config_set(TRACE_ACTIVE_LEVEL_ALL);
+    FILE* fd = fopen("./test.log", "w");
+    CHECK(fd);
+    mbed_trace_fputs_function_set(fputs);
+    mbed_trace_set_pipe(fd);
+    mbed_tracef(TRACE_LEVEL_DEBUG, "mygr", "hello");
+    CHECK(ftell(fd) == 20);
+    fclose(fd);
+    mbed_trace_print_function_set(myprint);
+    mbed_tracef(TRACE_LEVEL_DEBUG, "mygr", "hello");
+    STRCMP_EQUAL("[DBG ][mygr]: hello", buf);
+}
 TEST(trace, uninitialized)
 {
     mbed_tracef(TRACE_LEVEL_DEBUG, "mygr", "hello");
