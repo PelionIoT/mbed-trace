@@ -91,6 +91,19 @@ TEST(trace, Array)
   mbed_tracef(TRACE_LEVEL_DEBUG, "mygr", "%s", mbed_trace_array(longStr, 200) );
 }
 
+TEST(trace, Null0Array)
+{
+  static const unsigned char array[2] = { 0x23, 0x45 };
+  mbed_tracef(TRACE_LEVEL_DEBUG, "mygr", "%s", mbed_trace_array(array, 2));
+  STRCMP_EQUAL("23:45", buf);
+  mbed_tracef(TRACE_LEVEL_DEBUG, "mygr", "%s", mbed_trace_array(array, 0));
+  STRCMP_EQUAL("", buf);
+  mbed_tracef(TRACE_LEVEL_DEBUG, "mygr", "%s", mbed_trace_array(NULL, 0));
+  STRCMP_EQUAL("", buf);
+  mbed_tracef(TRACE_LEVEL_DEBUG, "mygr", "%s", mbed_trace_array(NULL, 2));
+  STRCMP_EQUAL("<null>", buf);
+}
+
 TEST(trace, LongString)
 {
   char longStr[1000] = {0x36};
@@ -440,6 +453,17 @@ TEST(trace, filters_control)
     
     mbed_trace_exclude_filters_set(0);
     STRCMP_EQUAL("", mbed_trace_exclude_filters_get());
+}
+TEST(trace, cmd_printer)
+{
+  buf[0] = 0;
+  mbed_trace_config_set(TRACE_ACTIVE_LEVEL_ALL);
+  mbed_tracef(TRACE_LEVEL_CMD, "mygr", "default printer");
+  STRCMP_EQUAL("default printer", buf);
+
+  mbed_trace_cmdprint_function_set( myprint );
+  mbed_tracef(TRACE_LEVEL_CMD, "mygr", "custom printer");
+  STRCMP_EQUAL("\n", buf); // because there is two print calls, second one add line feeds
 }
 TEST(trace, no_printer)
 {
