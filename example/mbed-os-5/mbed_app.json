@@ -1,0 +1,12 @@
+{
+    "macros": [
+        "MEM_ALLOC=malloc",
+        "MEM_FREE=free"
+    ],
+    "target_overrides": {
+        "*": {
+            "target.features_add": ["COMMON_PAL"],
+            "mbed-trace.enable": 1
+        }
+    }
+}
