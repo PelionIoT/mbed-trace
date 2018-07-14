@@ -16,12 +16,9 @@
 #include <stdio.h>
 
 #include "mbed.h"
+#include "mbed_trace.h"
 
 #define TRACE_GROUP                 "main"
-#define DEFAULT_SERIAL_BAUD_RATE    (115200)
-
-static RawSerial pc(USBTX, USBRX, DEFAULT_SERIAL_BAUD_RATE);
-
 
 int main(void)
 {

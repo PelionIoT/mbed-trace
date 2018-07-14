@@ -27,7 +27,7 @@ The purpose of the library is to provide a light, simple and general tracing sol
 * The trace function produces traces like: `[<levl>][grp ]: msg`. This provides an easy way to detect trace prints and separate traces from normal prints (for example with _regex_).
 * This approach requires a `sprintf` implementation (`stdio.h`). The memory consumption is pretty high, but it allows an efficient way to format traces.
 * The solution is not Interrupt safe. (PRs are more than welcome.)
-* The solution is not Thread safe by default. Thread safety for the actual trace calls can be enabled by providing wait and release callback functions that use mutexes defined by the application.
+* The solution is not thread safe by default. Thread safety for the actual trace calls can be enabled by providing wait and release callback functions that use mutexes defined by the application.
 
 ## Examples of traces
 
