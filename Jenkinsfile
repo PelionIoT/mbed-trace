@@ -213,7 +213,7 @@ def postBuild(buildName, isTest) {
     execute("mkdir -p output/${buildName}")
     execute("find . -name 'libmbed-trace.a' -exec mv {} 'output/${buildName}' \\;")
     execute("find . -name 'mbed-trace.ar' -exec mv {} 'output/${buildName}' \\;")
-    execute("find ../example-mbed-os-5 -name 'mbed-os-5.bin' -exec mv {} 'output/${buildName}/mbed-os-5-example.bin' \\; || true")
+    execute("find ../example-mbed-os-5 -name 'example-mbed-os-5.bin' -exec mv {} 'output/${buildName}/example-mbed-os-5.bin' \\; || true")
     // Archive artifacts
     step([
       $class: 'ArtifactArchiver',
