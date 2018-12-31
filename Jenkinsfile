@@ -19,7 +19,7 @@ def morpheusTargets = [
 // Map morpheus toolchains to compiler labels on Jenkins
 def toolchains = [
   ARM: "armcc",
-  // IAR: "iar_arm",
+  IAR: "iar_arm",
   GCC_ARM: "arm-none-eabi-gcc"
 ]
 // yotta target includes toolchain
@@ -84,6 +84,7 @@ def morpheusBuildStep(target, compilerLabel, toolchain) {
             execute("mbed --version")
             execute("echo https://github.com/armmbed/mbed-os/#62f8b922b420626514fd4690107aff4188469833 > mbed-os.lib")
             execute("mbed deploy")
+            execute("rm -rf ./mbed-os/features/frameworks/mbed-trace")
             execute("mbed compile -m ${target} -t ${toolchain} --library")
             setBuildStatus('SUCCESS', "build ${buildName}", "build done")
           } catch (err) {
@@ -176,8 +177,9 @@ def yottaBuildStep(target, compilerLabel) {
               }
             }
           } // stage
+          /*
           stage("leak-check:${buildName}") {
-            dir("example/linux") {
+            dir("example/linux") { // @todo
               def stageName = "leak-check"
               setBuildStatus('PENDING', "test ${stageName}", 'test starts')
               try {
@@ -190,6 +192,7 @@ def yottaBuildStep(target, compilerLabel) {
               }
             }
           } // stage
+          */
         } // if linux
         postBuild(buildName, isTest)
         step([$class: 'WsCleanup'])
