@@ -82,7 +82,7 @@ def morpheusBuildStep(target, compilerLabel, toolchain) {
         stage ("build:${buildName}") {
           try{
             execute("mbed --version")
-            execute("echo https://github.com/armmbed/mbed-os/#62f8b922b420626514fd4690107aff4188469833 > mbed-os.lib")
+            execute("echo https://github.com/armmbed/mbed-os/#6a0a86538c0b9b2bfcc4583b1e2b7fea8f4e71e9 > mbed-os.lib")
             execute("mbed deploy")
             execute("rm -rf ./mbed-os/features/frameworks/mbed-trace")
             execute("mbed compile -m ${target} -t ${toolchain} --library")
@@ -100,7 +100,7 @@ def morpheusBuildStep(target, compilerLabel, toolchain) {
             def exampleName = "example-${buildName}"
             setBuildStatus('PENDING', "build ${exampleName}", 'build starts')
             try {
-              execute("echo \"https://github.com/ARMmbed/mbed-os/#62f8b922b420626514fd4690107aff4188469833\" > mbed-os.lib")
+              execute("echo \"https://github.com/ARMmbed/mbed-os/#6a0a86538c0b9b2bfcc4583b1e2b7fea8f4e71e9\" > mbed-os.lib")
               execute("echo \"https://github.com/ARMmbed/mbed-trace#${env.GIT_COMMIT_HASH}\" > mbed-trace.lib")
               execute("mbed new .")
               execute("mbed deploy")
