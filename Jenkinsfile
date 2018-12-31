@@ -230,7 +230,7 @@ def postBuild(buildName, isTest) {
           $class: 'WarningsPublisher',
           parserConfigurations: [[
             parserName: 'GNU Make + GNU C Compiler (gcc)',
-            pattern: 'mbed-trace/*.c,source/*.h,test/*.cpp'
+            pattern: 'mbed-trace/*.h,source/*.c,test/*.cpp'
           ]],
           unstableTotalAll: '0',
           useDeltaValues: true,
