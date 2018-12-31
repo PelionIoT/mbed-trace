@@ -213,6 +213,7 @@ def postBuild(buildName, isTest) {
     execute("mkdir -p output/${buildName}")
     execute("find . -name 'libmbed-trace.a' -exec mv {} 'output/${buildName}' \\;")
     execute("find . -name 'mbed-trace.ar' -exec mv {} 'output/${buildName}' \\;")
+    execute("find ../example-mbed-os-5 -name 'mbed-os-5.bin' -exec mv {} 'output/${buildName}/mbed-os-5-example.bin' \\; || true")
     // Archive artifacts
     step([
       $class: 'ArtifactArchiver',
@@ -245,8 +246,6 @@ def postBuild(buildName, isTest) {
           reportFiles: "index.html",
           reportName: "Build HTML Report"
         ])
-    } else {
-        execute("find ../example-mbed-os-5 -name 'mbed-os-5.bin' -exec mv {} 'output/${buildName}/mbed-os-5-example.bin' \\;")
     }
 }
 // helper function to set build status to github PR
