@@ -105,7 +105,7 @@ def morpheusBuildStep(target, compilerLabel, toolchain) {
               execute("mbed new .")
               execute("mbed deploy")
               execute("rm -rf ./mbed-os/features/frameworks/mbed-trace")
-              execute("rm -rf ./mbed-trace/example/linux")
+              execute("rm -rf ./mbed-trace/example")
               execute("rm -rf ./mbed-trace/test")
               execute("mbed compile -t ${toolchain} -m ${target}")
               setBuildStatus('SUCCESS', "build ${exampleName}", "build done")
