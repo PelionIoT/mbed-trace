@@ -82,7 +82,7 @@ Don't forget to fulfill the other [prerequisites](#prerequisites)!
 ## Examples
 
 * [mbed-os-5](example/mbed-os-5)
-* [linux](examples/linux)
+* [linux](example/linux)
 
 ### Traces
 
