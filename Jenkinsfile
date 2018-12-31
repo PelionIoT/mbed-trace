@@ -155,7 +155,12 @@ def yottaBuildStep(target, compilerLabel) {
               execute("genhtml -o ./test_coverage coverage.info")
               execute("gcovr -x -o junit.xml")
               execute("cppcheck --enable=all --std=c99 --inline-suppr --template=\"{file},{line},{severity},{id},{message}\" source 2> cppcheck.txt")
-              // execute("astyle source/*.c mbed-trace/*.h") // @todo
+
+              // check if astyle is correct
+              execute("astyle source/*.c mbed-trace/*.h --project=.astylerc")
+              // check differency
+              execute("git diff-index --quiet HEAD")
+
               setBuildStatus('SUCCESS', "test ${buildName}", "test done")
             } catch(err) {
               echo "Caught exception: ${err}"
