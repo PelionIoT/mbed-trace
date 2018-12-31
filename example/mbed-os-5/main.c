@@ -27,6 +27,6 @@ int main(void)
     // trace Something
     tr_info("Hello tracers");
     while(1) {
-      tr_debug("Infinite loop..");
+        tr_debug("Infinite loop..");
     }
 }

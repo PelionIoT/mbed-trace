@@ -78,11 +78,16 @@ Don't forget to fulfill the other [prerequisites](#prerequisites)!
 
 ([Click here for more information on the configuration system](https://docs.mbed.com/docs/mbed-os-api/en/latest/config_system/))
 
-[Here](example/mbed-os-5) is simple example application for mbed-os 5
+
+## Examples
+
+* [mbed-os-5](example/mbed-os-5)
+* [linux](examples/linux)
 
 ### Traces
 
-When you want to print traces, use the `tr_<level>` macros. The macros behave like `printf()`. For example, `tr_debug("hello %s", "trace")` produces the following trace line: `[DBG ][APPL] hello trace<cr><lf>`.
+When you want to print traces, use the `tr_<level>` macros. The macros behave like `printf()`. For example,
+`tr_debug("hello %s", "trace")` produces the following trace line: `[DBG ][APPL] hello trace<cr><lf>`.
 
 Available levels:
 
@@ -150,7 +155,9 @@ In Mbed OS, the build time maximum tracing level can be set through `mbed_app.js
 
 ### Helping functions
 
-The purpose of the helping functions is to provide simple conversions, for example from an array to C string, so that you can print everything to single trace line. They must be called inside the actual trace calls, for example:
+The purpose of the helping functions is to provide simple conversions,
+for example from an array to C string, so that you can print everything to single trace line.
+They must be called inside the actual trace calls, for example:
 
 ```
 tr_debug("My IP6 address: %s", mbed_trace_ipv6(addr));

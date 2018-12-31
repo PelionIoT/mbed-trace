@@ -93,7 +93,7 @@ def morpheusBuildStep(target, compilerLabel, toolchain) {
             throw err
           }
         }
-        /*stage("build:example:${buildName}") {
+        stage("build:example:${buildName}") {
           execute("mkdir ../example-mbed-os-5 || true")
           execute("cp -R example/mbed-os-5 ../example-mbed-os-5")
           dir("../example-mbed-os-5") {
@@ -117,7 +117,7 @@ def morpheusBuildStep(target, compilerLabel, toolchain) {
               step([$class: 'WsCleanup'])
             }
           }
-        }*/
+        }
       }
     }
   }
