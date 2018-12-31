@@ -177,9 +177,9 @@ def yottaBuildStep(target, compilerLabel) {
               }
             }
           } // stage
-          /*
+
           stage("leak-check:${buildName}") {
-            dir("example/linux") { // @todo
+            dir("example/linux") {
               def stageName = "leak-check"
               setBuildStatus('PENDING', "test ${stageName}", 'test starts')
               try {
@@ -192,7 +192,6 @@ def yottaBuildStep(target, compilerLabel) {
               }
             }
           } // stage
-          */
         } // if linux
         postBuild(buildName, isTest)
         step([$class: 'WsCleanup'])
