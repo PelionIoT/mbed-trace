@@ -20,14 +20,14 @@ The purpose of the library is to provide a light, simple and general tracing sol
 ## Compromises
 
 * The traces are stored as ASCII arrays in the flash memory (pretty high memory consumption). Therefore, it is not necessary to:
- * encode/decode the trace messages on the fly (this may take too much CPU time) or 
- * have external dev-env dependencies to encode the traces compile time and an external application to decode the traces. 
+  * encode/decode the trace messages on the fly (this may take too much CPU time) or
+  * have external dev-env dependencies to encode the traces compile time and an external application to decode the traces.
 * The group name length is limited to four characters. This makes the lines cleaner and it is enough for most use cases for separating the module names. The group name length may not be suitable for a clean human readable format, but still four characters is enough for unique module names.
-* The trace function uses `stdout` as the default output target because it goes directly to serial port when initialized. 
+* The trace function uses `stdout` as the default output target because it goes directly to serial port in mbed-os.
 * The trace function produces traces like: `[<levl>][grp ]: msg`. This provides an easy way to detect trace prints and separate traces from normal prints (for example with _regex_).
 * This approach requires a `sprintf` implementation (`stdio.h`). The memory consumption is pretty high, but it allows an efficient way to format traces.
 * The solution is not Interrupt safe. (PRs are more than welcome.)
-* The solution is not Thread safe by default. Thread safety for the actual trace calls can be enabled by providing wait and release callback functions that use mutexes defined by the application. 
+* The solution is not thread safe by default. Thread safety for the actual trace calls can be enabled by providing wait and release callback functions that use mutexes defined by the application.
 
 ## Examples of traces
 
@@ -43,7 +43,7 @@ The purpose of the library is to provide a light, simple and general tracing sol
 ### Prerequisites
 
 * Initialize the serial port so that `stdout` works. You can verify that the serial port works using the `printf()` function.
-    * if you want to redirect the traces somewhere else, see the [trace API](https://github.com/ARMmbed/mbed-trace/blob/master/mbed-trace/mbed_trace.h#L170).
+    * if you want to redirect the traces somewhere else, see the [trace API](https://github.com/ARMmbed/mbed-trace/blob/master/mbed-trace/mbed_trace.h#L245).
 * To enable the tracing API:
     * With yotta: set `YOTTA_CFG_MBED_TRACE` to 1 or true. Setting the flag to 0 or false disables tracing.
     * [With mbed OS 5](#enabling-the-tracing-api-in-mbed-os-5)
@@ -78,9 +78,16 @@ Don't forget to fulfill the other [prerequisites](#prerequisites)!
 
 ([Click here for more information on the configuration system](https://docs.mbed.com/docs/mbed-os-api/en/latest/config_system/))
 
+
+## Examples
+
+* [mbed-os-5](example/mbed-os-5)
+* [linux](example/linux)
+
 ### Traces
 
-When you want to print traces, use the `tr_<level>` macros. The macros behave like `printf()`. For example, `tr_debug("hello %s", "trace")` produces the following trace line: `[DBG ][APPL] hello trace<cr><lf>`.
+When you want to print traces, use the `tr_<level>` macros. The macros behave like `printf()`. For example,
+`tr_debug("hello %s", "trace")` produces the following trace line: `[DBG ][APPL] hello trace<cr><lf>`.
 
 Available levels:
 
@@ -109,9 +116,48 @@ Set the output function, `printf` by default:
 mbed_trace_print_function_set(printf)
 ```
 
+### Tracing level
+
+Run time tracing level is set using `mbed_trace_set_config()` function. Possible levels and examples how to set them is presented below.
+
+```c
+//mbed_trace_config_set(TRACE_ACTIVE_LEVEL_ALL);
+//mbed_trace_config_set(TRACE_ACTIVE_LEVEL_DEBUG); // (same as ALL)
+mbed_trace_config_set(TRACE_ACTIVE_LEVEL_INFO);
+//mbed_trace_config_set(TRACE_ACTIVE_LEVEL_WARN);
+//mbed_trace_config_set(TRACE_ACTIVE_LEVEL_ERROR);
+//mbed_trace_config_set(TRACE_ACTIVE_LEVEL_CMD);
+//mbed_trace_config_set(TRACE_ACTIVE_LEVEL_NONE);
+```
+
+Build time optimization can be done with `MBED_TRACE_MAX_LEVEL` definition. Setting max level to `TRACE_LEVEL_DEBUG` includes all traces to the build. Setting max level to `TRACE_LEVEL_INFO` includes all but `tr_debug()` traces to the build. Other maximum tracing levels follow the same behavior and no messages above the selected level are included in the build.
+
+```c
+#define MBED_TRACE_MAX_LEVEL TRACE_LEVEL_DEBUG
+#define MBED_TRACE_MAX_LEVEL TRACE_LEVEL_INFO
+#define MBED_TRACE_MAX_LEVEL TRACE_LEVEL_WARN
+#define MBED_TRACE_MAX_LEVEL TRACE_LEVEL_ERROR
+#define MBED_TRACE_MAX_LEVEL TRACE_LEVEL_CMD
+```
+
+In Mbed OS, the build time maximum tracing level can be set through `mbed_app.json` as shown below.
+
+```
+{
+   "target_overrides":{
+      "*":{
+         "mbed-trace.enable": true,
+         "mbed-trace.max-level": "TRACE_LEVEL_INFO"
+      }
+   }
+}
+```
+
 ### Helping functions
 
-The purpose of the helping functions is to provide simple conversions, for example from an array to C string, so that you can print everything to single trace line. They must be called inside the actual trace calls, for example:
+The purpose of the helping functions is to provide simple conversions,
+for example from an array to C string, so that you can print everything to single trace line.
+They must be called inside the actual trace calls, for example:
 
 ```
 tr_debug("My IP6 address: %s", mbed_trace_ipv6(addr));
