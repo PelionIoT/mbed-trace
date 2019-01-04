@@ -161,7 +161,7 @@ def yottaBuildStep(target, compilerLabel) {
               // check if astyle is correct
               execute("ls -la")
               execute("astyle --version")
-              execute("astyle --project=\\.astylerc source/*.c mbed-trace/*.h")
+              execute("astyle --project=_astylerc source/*.c mbed-trace/*.h")
               // check differency
               execute("git diff-index --quiet HEAD")
 
