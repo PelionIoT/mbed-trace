@@ -159,7 +159,8 @@ def yottaBuildStep(target, compilerLabel) {
               execute("cppcheck --enable=all --std=c99 --inline-suppr --template=\"{file},{line},{severity},{id},{message}\" source 2> cppcheck.txt")
 
               // check if astyle is correct
-              execute("astyle --project=./.astylerc source/*.c mbed-trace/*.h")
+              execute("ls -la")
+              execute("astyle --project=.astylerc source/*.c mbed-trace/*.h")
               // check differency
               execute("git diff-index --quiet HEAD")
 
@@ -201,7 +202,7 @@ def yottaBuildStep(target, compilerLabel) {
           } // stage
         } // if linux
         postBuild(buildName, isTest)
-        step([$class: 'WsCleanup'])
+        //step([$class: 'WsCleanup'])
       } // dir
     }
   }
