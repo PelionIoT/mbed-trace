@@ -159,7 +159,7 @@ def yottaBuildStep(target, compilerLabel) {
               execute("cppcheck --enable=all --std=c99 --inline-suppr --template=\"{file},{line},{severity},{id},{message}\" source 2> cppcheck.txt")
 
               // check if astyle is correct
-              execute("astyle source/*.c mbed-trace/*.h --project=.astylerc")
+              execute("astyle --project=.astylerc source/*.c mbed-trace/*.h")
               // check differency
               execute("git diff-index --quiet HEAD")
 
