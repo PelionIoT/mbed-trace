@@ -28,7 +28,7 @@ def yottaTargets = [
   "frdm-k64f-armcc": "armcc",
   "nrf51dk-gcc": "gcc",
   "stm32f429i-disco-gcc": "gcc",
-  "x86-linux-native": "linux"
+  "x86-linux-native": "linux && astyle"
 ]
 
 // Initial maps for parallel build steps
