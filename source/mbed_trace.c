@@ -152,7 +152,7 @@ static trace_t m_trace = {
     .mutex_lock_count = 0
 };
 
-int mbed_trace_init(void)
+int mbed_trace_init(void )
 {
     if (m_trace.line == NULL) {
         m_trace.line = MBED_TRACE_MEM_ALLOC(m_trace.line_length);
