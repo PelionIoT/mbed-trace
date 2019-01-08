@@ -161,7 +161,7 @@ def yottaBuildStep(target, compilerLabel) {
               // check if astyle is correct
               execute("astyle --options=.astylerc source/*.c mbed-trace/*.h")
               // check differency
-              execute("git diff-index HEAD")
+              execute("git diff-index --exit-code HEAD")
 
               setBuildStatus('SUCCESS', "test ${buildName}", "test done")
             } catch(err) {
