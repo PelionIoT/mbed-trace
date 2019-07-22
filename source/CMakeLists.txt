@@ -1,3 +1,5 @@
+# Copyright (c) 2019 ARM Limited
+# SPDX-License-Identifier: Apache-2.0
 if(DEFINED TARGET_LIKE_X86_LINUX_NATIVE)
     add_library( mbed-trace
         mbed_trace.c

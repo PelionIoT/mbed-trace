@@ -1,3 +1,6 @@
+# Copyright (c) 2019 ARM Limited
+# SPDX-License-Identifier: Apache-2.0
+
 SRCS := $(wildcard source/*.c)
 LIB := libmbed-trace.a
 EXPORT_HEADERS := mbed-trace
