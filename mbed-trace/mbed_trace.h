@@ -48,14 +48,9 @@
 extern "C" {
 #endif
 
-#ifdef YOTTA_CFG
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
-#else
-#include "ns_types.h"
-#endif
-
 #include <stdarg.h>
 
 #ifndef YOTTA_CFG_MBED_TRACE
