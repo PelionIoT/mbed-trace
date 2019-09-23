@@ -49,12 +49,12 @@ void myprint(const char *str)
 TEST_GROUP(trace)
 {
     void setup() {
-
         mbed_trace_init();
         mbed_trace_config_set(TRACE_MODE_PLAIN | TRACE_ACTIVE_LEVEL_ALL);
         mbed_trace_print_function_set(myprint);
         mbed_trace_mutex_wait_function_set(my_mutex_wait);
         mbed_trace_mutex_release_function_set(my_mutex_release);
+        buf[0] = '\0';
     }
     void teardown() {
         CHECK(mutex_wait_count == mutex_release_count); // Check the mutex count with every test
@@ -240,6 +240,78 @@ TEST(trace, config_change)
     CHECK(mbed_trace_config_get() == TRACE_MODE_PLAIN | TRACE_ACTIVE_LEVEL_NONE);
     mbed_trace_config_set(TRACE_MODE_PLAIN | TRACE_ACTIVE_LEVEL_ALL);
     CHECK(mbed_trace_config_get() == TRACE_MODE_PLAIN | TRACE_ACTIVE_LEVEL_ALL);
+}
+
+TEST(trace, group_level_set_none)
+{
+    mbed_trace_config_set(TRACE_ACTIVE_LEVEL_ALL);
+    mbed_trace_group_level_set("mygr", TRACE_ACTIVE_LEVEL_NONE);
+    mbed_tracef(TRACE_LEVEL_DEBUG, "mygr", "hello");
+    STRCMP_EQUAL("", buf);
+    mbed_tracef(TRACE_LEVEL_INFO, "mygr", "hello");
+    STRCMP_EQUAL("", buf);
+    mbed_tracef(TRACE_LEVEL_WARN, "mygr", "hello");
+    STRCMP_EQUAL("", buf);
+    mbed_tracef(TRACE_LEVEL_ERROR, "mygr", "hello");
+    STRCMP_EQUAL("", buf);
+}
+TEST(trace, group_level_set)
+{
+    mbed_trace_config_set(TRACE_ACTIVE_LEVEL_WARN);
+    mbed_trace_group_level_set("mygr", TRACE_ACTIVE_LEVEL_INFO);
+    mbed_tracef(TRACE_LEVEL_DEBUG, "mygr", "hello");
+    STRCMP_EQUAL("", buf);
+    mbed_tracef(TRACE_LEVEL_INFO, "mygr", "hello");
+    STRCMP_EQUAL("[INFO][mygr]: hello", buf);
+    mbed_tracef(TRACE_LEVEL_WARN, "mygr", "hello");
+    STRCMP_EQUAL("[WARN][mygr]: hello", buf);
+    mbed_tracef(TRACE_LEVEL_ERROR, "mygr", "hello");
+    STRCMP_EQUAL("[ERR ][mygr]: hello", buf);
+
+    mbed_trace_config_set(TRACE_ACTIVE_LEVEL_WARN);
+    mbed_trace_group_level_set("mygr", TRACE_ACTIVE_LEVEL_DEBUG);
+    mbed_tracef(TRACE_LEVEL_DEBUG, "mygr", "hello");
+    STRCMP_EQUAL("[DBG ][mygr]: hello", buf);
+    mbed_tracef(TRACE_LEVEL_INFO, "mygr", "hello");
+    STRCMP_EQUAL("[INFO][mygr]: hello", buf);
+    mbed_tracef(TRACE_LEVEL_WARN, "mygr", "hello");
+    STRCMP_EQUAL("[WARN][mygr]: hello", buf);
+    mbed_tracef(TRACE_LEVEL_ERROR, "mygr", "hello");
+    STRCMP_EQUAL("[ERR ][mygr]: hello", buf);
+}
+TEST(trace, group_level_set_all)
+{
+    mbed_trace_config_set(TRACE_ACTIVE_LEVEL_NONE);
+    mbed_trace_group_level_set("mygr", TRACE_ACTIVE_LEVEL_ALL);
+    mbed_tracef(TRACE_LEVEL_DEBUG, "mygr", "hello");
+    STRCMP_EQUAL("[DBG ][mygr]: hello", buf);
+    mbed_tracef(TRACE_LEVEL_INFO, "mygr", "hello");
+    STRCMP_EQUAL("[INFO][mygr]: hello", buf);
+    mbed_tracef(TRACE_LEVEL_WARN, "mygr", "hello");
+    STRCMP_EQUAL("[WARN][mygr]: hello", buf);
+    mbed_tracef(TRACE_LEVEL_ERROR, "mygr", "hello");
+    STRCMP_EQUAL("[ERR ][mygr]: hello", buf);
+}
+TEST(trace, group_level_unset) {
+    mbed_trace_config_set(TRACE_ACTIVE_LEVEL_NONE);
+    mbed_tracef(TRACE_LEVEL_DEBUG, "mygr", "hello");
+    STRCMP_EQUAL("", buf);
+
+    mbed_trace_group_level_set("mygr", TRACE_ACTIVE_LEVEL_ALL);
+    mbed_tracef(TRACE_LEVEL_DEBUG, "mygr", "hello");
+
+    STRCMP_EQUAL("[DBG ][mygr]: hello", buf);
+    mbed_tracef(TRACE_LEVEL_INFO, "mygr", "Ola");
+    STRCMP_EQUAL("[INFO][mygr]: Ola", buf);
+    mbed_tracef(TRACE_LEVEL_WARN, "mygr", "Gutten Tag");
+    STRCMP_EQUAL("[WARN][mygr]: Gutten Tag", buf);
+    mbed_tracef(TRACE_LEVEL_ERROR, "mygr", "Bonjour");
+    STRCMP_EQUAL("[ERR ][mygr]: Bonjour", buf);
+
+    buf[0] = 0;
+    mbed_trace_group_level_unset("mygr");
+    mbed_tracef(TRACE_LEVEL_DEBUG, "mygr", "hello");
+    STRCMP_EQUAL("", buf);
 }
 
 TEST(trace, active_level_all_color)

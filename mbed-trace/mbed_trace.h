@@ -214,6 +214,18 @@ void mbed_trace_config_set(uint8_t config);
  * @return trace configuration byte
  */
 uint8_t mbed_trace_config_get(void);
+/** set log level for a trace group.
+ * @param grp    trace group
+ * @param dlevel debug level
+ * @return true on success.
+ *
+ * @Note grp must live for as long as the group level will be set.
+ */
+bool mbed_trace_group_level_set(const char *grp, uint8_t dlevel);
+/** unset log level for a trace group.
+ * @param grp    trace group
+ */
+void mbed_trace_group_level_unset(const char *grp);
 /**
  * Set trace prefix function
  * pref_f -function return string with null terminated
@@ -384,6 +396,7 @@ char *mbed_trace_array(const uint8_t *buf, uint16_t len);
 #undef mbed_trace_buffer_sizes
 #undef mbed_trace_config_set
 #undef mbed_trace_config_get
+#undef mbed_trace_group_level_set
 #undef mbed_trace_prefix_function_set
 #undef mbed_trace_suffix_function_set
 #undef mbed_trace_print_function_set
@@ -409,6 +422,7 @@ char *mbed_trace_array(const uint8_t *buf, uint16_t len);
 #define mbed_trace_buffer_sizes(...)                ((void) 0)
 #define mbed_trace_config_set(...)                  ((void) 0)
 #define mbed_trace_config_get(...)                  ((uint8_t) 0)
+#define mbed_trace_group_level_set(...)             ((void) 0)
 #define mbed_trace_prefix_function_set(...)         ((void) 0)
 #define mbed_trace_suffix_function_set(...)         ((void) 0)
 #define mbed_trace_print_function_set(...)          ((void) 0)
