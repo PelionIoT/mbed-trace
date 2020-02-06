@@ -52,6 +52,7 @@ extern "C" {
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdarg.h>
+#include <inttypes.h>
 
 #ifndef YOTTA_CFG_MBED_TRACE
 #define YOTTA_CFG_MBED_TRACE 0
