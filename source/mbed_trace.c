@@ -94,6 +94,7 @@
 
 /** default print function, just redirect str to printf */
 static void mbed_trace_realloc(char **buffer, int *length_ptr, int new_length);
+static uint32_t mbed_trace_get_group_config_idx(const char *grp, uint32_t *max);
 static void mbed_trace_default_print(const char *str);
 static void mbed_trace_reset_tmp(void);
 
@@ -229,8 +230,18 @@ void mbed_trace_free(void)
 }
 static void mbed_trace_realloc(char **buffer, int *length_ptr, int new_length)
 {
-    MBED_TRACE_MEM_FREE(*buffer);
-    *buffer  = MBED_TRACE_MEM_ALLOC(new_length);
+    void *new_buffer = NULL;
+    if (new_length != 0) {
+        new_buffer = MBED_TRACE_MEM_ALLOC(new_length);
+        // TODO: This may fail
+        if (*buffer != NULL) {
+            memcpy(new_buffer, *buffer, (*length_ptr > new_length)?new_length:*length_ptr);
+        }
+    }
+    if (*buffer != NULL) {
+        MBED_TRACE_MEM_FREE(*buffer);
+    }
+    *buffer = new_buffer;
     *length_ptr = new_length;
 }
 void mbed_trace_buffer_sizes(int lineLength, int tmpLength)
@@ -251,55 +262,59 @@ uint8_t mbed_trace_config_get(void)
 {
     return m_trace.trace_config;
 }
-bool mbed_trace_group_level_set(const char *grp, uint8_t dlevel) {
-    // pos = lookup
+static uint32_t mbed_trace_get_group_config_idx(const char *grp, uint32_t *max) {
     uint32_t pos = 0;
-    for (uint32_t pos = 0; pos < m_trace.group_configs_length; pos++) {
+    *max = m_trace.group_configs_length / sizeof(trace_group_config_t);
+    for (uint32_t pos = 0; pos < *max; pos++) {
         if (strcmp(m_trace.group_configs[pos].grp, grp) == 0) {
             break;
         }
     }
+    return pos;
+}
+bool mbed_trace_group_level_set(const char *grp, uint8_t dlevel) {
+    uint32_t max = 0;
+    uint32_t pos = mbed_trace_get_group_config_idx(grp, &max);
     // If found
-    if (pos < m_trace.group_configs_length) {
+    if (pos < max) {
         m_trace.group_configs[pos].dlevel = dlevel;
     } else {
-        void * res = realloc(
-            m_trace.group_configs,
-            m_trace.group_configs_length + 1
+        uint32_t previous_size = m_trace.group_configs_length;
+        mbed_trace_realloc(
+            (char **)(&m_trace.group_configs),
+            &m_trace.group_configs_length,
+            m_trace.group_configs_length + sizeof(trace_group_config_t)
         );
-        if (res != NULL) {
-            m_trace.group_configs = res;
-            m_trace.group_configs_length += 1;
-            m_trace.group_configs[pos].grp = grp;
-            m_trace.group_configs[pos].dlevel = dlevel;
-        } else  {
+        if (previous_size == m_trace.group_configs_length) {
             return false;
         }
+        m_trace.group_configs[pos].grp = grp;
+        m_trace.group_configs[pos].dlevel = dlevel;
     }
     return true;
 }
 void mbed_trace_group_level_unset(const char *grp) {
-    // pos = lookup
-    uint32_t pos = 0;
-    for (uint32_t pos = 0; pos < m_trace.group_configs_length; pos++) {
-        if (strcmp(m_trace.group_configs[pos].grp, grp) == 0) {
-            break;
-        }
-    }
+    uint32_t max = 0;
+    uint32_t pos = mbed_trace_get_group_config_idx(grp, &max);
     // If found
-    if (pos < m_trace.group_configs_length) {
+    if (pos < max) {
         // free the last element & discard the one at `pos`
         memmove(
             &m_trace.group_configs[pos],
             &m_trace.group_configs[pos+1],
-            m_trace.group_configs_length - (pos + 1)
+            m_trace.group_configs_length - ((pos + 1) * sizeof(trace_group_config_t))
         );
-        m_trace.group_configs_length -= 1;
-        // resize the array
-        void *res = realloc(m_trace.group_configs, m_trace.group_configs_length);
-        // Failing at reallocating will only make the array take a bit more memory than it should.
-        if ((res != NULL) || (m_trace.group_configs_length == 0)) {
-            m_trace.group_configs = res;
+        if (m_trace.group_configs_length > 1) {
+            // resize the array
+            mbed_trace_realloc(
+                    (char **)(&m_trace.group_configs),
+                    &m_trace.group_configs_length,
+                    m_trace.group_configs_length - sizeof(trace_group_config_t)
+            );
+        } else {
+            MBED_TRACE_MEM_FREE(m_trace.group_configs);
+            m_trace.group_configs_length = 0;
+            m_trace.group_configs = NULL;
         }
     }
 }
@@ -384,10 +399,10 @@ void mbed_tracef(uint8_t dlevel, const char *grp, const char *fmt, ...)
 static uint8_t mbed_trace_get_group_config(const char *grp)
 {
     // lookup and return found value
-    for (uint32_t pos = 0; pos < m_trace.group_configs_length; pos++) {
-        if (strncmp(grp, m_trace.group_configs[pos].grp, 4) == 0) {
-            return m_trace.group_configs[pos].dlevel;
-        }
+    uint32_t max = 0;
+    uint32_t pos = mbed_trace_get_group_config_idx(grp, &max);
+    if (pos < max) {
+        return m_trace.group_configs[pos].dlevel;
     }
     return m_trace.trace_config;
 }
