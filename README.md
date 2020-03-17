@@ -206,6 +206,39 @@ int main(void){
 }
 ```
 
+## Run-time trace group filtering
+
+You can control run-time the tracing per trace group. Each of your modules should should define the trace group (using `#define TRACE_GROUP "abcd"` in the .c/.cpp file) and you can use this trace group for controlling the tracing.
+
+| Function                          | Explanation                                                |
+|-----------------------------------|------------------------------------------------------------|
+|`mbed_trace_include_filters_get()` | Get pointer to the component exclusion filter list.        |
+|`mbed_trace_include_filters_set()` | Include only the traces matching component list.           |
+|`mbed_trace_exclude_filters_get()` | Get pointer to the component inclusion filter list.        |
+|`mbed_trace_exclude_filters_set()` | Exclude the traces matching component list.                |
+
+The filter string is by default relatively short (24) and you can change its length by defining `DEFAULT_TRACE_FILTER_LENGTH`. If you use multiple components in the filter, separate them with a character that is not being used in the components name, such as comma (`,`). The matching is done simply using `strstr()` from  C standard libraries.
+
+Assuming we have 4 modules called "MAIN", "HELP", "CALC" and "PRNT" we could use the filters in a following way:
+
+```
+    mbed_trace_include_filters_set("MAIN, CALC");
+```
+This would drop out the printing from modules "HELP" and "PRNT" because they are not in the inclusion list.
+
+```
+    mbed_trace_include_filters_set(NULL);
+```
+
+This would reset the inclusion filters back to nothing and all modules would be traced again.
+
+```
+    mbed_trace_exclude_filters_set("HELP, PRNT");
+```
+This would do the same, but via the opposite way - only "MAIN" and "CALC" would trace, as they would not be excluded.
+
+The get/set APIs allow you do to any kind of dynamic run-time changes to the filterings.
+
 ## Unit tests
 
 To run unit tests:
