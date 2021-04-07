@@ -82,48 +82,62 @@ extern "C" {
     and 5 lower bits are trace level configuration */
 
 /** Config mask */
-#define TRACE_MASK_CONFIG         0xE0
+#define TRACE_MASK_CONFIG         0xF0
 /** Trace level mask */
-#define TRACE_MASK_LEVEL          0x1F
+#define TRACE_MASK_LEVEL          0x0F
 
 /** plain trace data instead of "headers" */
-#define TRACE_MODE_PLAIN          0x80
+#define TRACE_MODE_PLAIN          0x40
 /** color mode */
-#define TRACE_MODE_COLOR          0x40
+#define TRACE_MODE_COLOR          0x20
 /** Use print CR before trace line */
-#define TRACE_CARRIAGE_RETURN     0x20
+#define TRACE_CARRIAGE_RETURN     0x10
 
-/** used to activate all trace levels */
-#define TRACE_ACTIVE_LEVEL_ALL    0x1F
-/** print all traces same as above */
-#define TRACE_ACTIVE_LEVEL_DEBUG  0x1f
-/** print info,warn and error traces */
-#define TRACE_ACTIVE_LEVEL_INFO   0x0f
-/** print warn and error traces */
-#define TRACE_ACTIVE_LEVEL_WARN   0x07
-/** print only error trace */
-#define TRACE_ACTIVE_LEVEL_ERROR  0x03
-/** print only cmd line data */
-#define TRACE_ACTIVE_LEVEL_CMD    0x01
-/** trace nothing  */
-#define TRACE_ACTIVE_LEVEL_NONE   0x00
-
+/** this print is some silly deep information for debug purpose */
+#define TRACE_LEVEL_SILLY         0x07
 /** this print is some deep information for debug purpose */
-#define TRACE_LEVEL_DEBUG         0x10
+#define TRACE_LEVEL_DEBUG         0x06
 /** Info print, for general purpose prints */
-#define TRACE_LEVEL_INFO          0x08
+#define TRACE_LEVEL_INFO          0x05
 /** warning prints, which shouldn't causes any huge problems */
 #define TRACE_LEVEL_WARN          0x04
 /** Error prints, which causes probably problems, e.g. out of mem. */
-#define TRACE_LEVEL_ERROR         0x02
+#define TRACE_LEVEL_ERROR         0x03
+/** Critical prints, which causes critical problems */
+#define TRACE_LEVEL_CRITICAL      0x02
 /** special level for cmdline. Behaviours like "plain mode" */
 #define TRACE_LEVEL_CMD           0x01
 
+/** used to activate all trace levels */
+#define TRACE_ACTIVE_LEVEL_ALL    TRACE_LEVEL_SILLY
+/** print all traces same as above */
+#define TRACE_ACTIVE_LEVEL_SILLY  TRACE_LEVEL_SILLY
+/** print debug,warn, error and critical traces */
+#define TRACE_ACTIVE_LEVEL_DEBUG  TRACE_LEVEL_DEBUG
+/** print info, warn, error and critical traces */
+#define TRACE_ACTIVE_LEVEL_INFO   TRACE_LEVEL_INFO
+/** print warn, error and critical traces */
+#define TRACE_ACTIVE_LEVEL_WARN   TRACE_LEVEL_WARN
+/** print error and critical trace */
+#define TRACE_ACTIVE_LEVEL_ERROR  TRACE_LEVEL_ERROR
+/** print only critical trace */
+#define TRACE_ACTIVE_LEVEL_CRITICAL  TRACE_LEVEL_CRITICAL
+/** print only cmd line data */
+#define TRACE_ACTIVE_LEVEL_CMD    TRACE_LEVEL_CMD
+/** trace nothing  */
+#define TRACE_ACTIVE_LEVEL_NONE   0x00
+
 #ifndef MBED_TRACE_MAX_LEVEL
-#define MBED_TRACE_MAX_LEVEL TRACE_LEVEL_DEBUG
+#define MBED_TRACE_MAX_LEVEL TRACE_LEVEL_SILLY
 #endif
 
 //usage macros:
+#if MBED_TRACE_MAX_LEVEL >= TRACE_LEVEL_SILLY && !defined(tr_silly)
+#define tr_silly(...)           mbed_tracef(TRACE_LEVEL_SILLY,   TRACE_GROUP, __VA_ARGS__)   //!< Print silly message
+#else
+#define tr_silly(...)
+#endif
+
 #if MBED_TRACE_MAX_LEVEL >= TRACE_LEVEL_DEBUG
 #define tr_debug(...)           mbed_tracef(TRACE_LEVEL_DEBUG,   TRACE_GROUP, __VA_ARGS__)   //!< Print debug message
 #else
@@ -150,6 +164,14 @@ extern "C" {
 #else
 #define tr_error(...)
 #define tr_err(...)
+#endif
+
+#if MBED_TRACE_MAX_LEVEL >= TRACE_LEVEL_CRITICAL
+#define tr_critical(...)         mbed_tracef(TRACE_LEVEL_CRITICAL,   TRACE_GROUP, __VA_ARGS__)   //!< Print Critical Message
+#define tr_crit(...)             mbed_tracef(TRACE_LEVEL_CRITICAL,   TRACE_GROUP, __VA_ARGS__)   //!< Alternative Critical message
+#else
+#define tr_critical(...)
+#define tr_crit(...)
 #endif
 
 #define tr_cmdline(...)         mbed_tracef(TRACE_LEVEL_CMD,     TRACE_GROUP, __VA_ARGS__)   //!< Special print for cmdline. See more from TRACE_LEVEL_CMD -level
@@ -201,10 +223,12 @@ void mbed_trace_buffer_sizes(int lineLength, int tmpLength);
  *   TRACE_CARRIAGE_RETURN (print CR before trace line)
  *
  *   TRACE_ACTIVE_LEVEL_ALL - to activate all trace levels
- *   or TRACE_ACTIVE_LEVEL_DEBUG (alternative)
+ *   or TRACE_ACTIVE_LEVEL_SILLY (alternative)
+ *   TRACE_ACTIVE_LEVEL_DEBUG
  *   TRACE_ACTIVE_LEVEL_INFO
  *   TRACE_ACTIVE_LEVEL_WARN
  *   TRACE_ACTIVE_LEVEL_ERROR
+ *   TRACE_ACTIVE_LEVEL_CRITICAL
  *   TRACE_ACTIVE_LEVEL_CMD
  *   TRACE_LEVEL_NONE - to deactivate all traces
  *

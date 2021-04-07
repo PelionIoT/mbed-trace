@@ -23,10 +23,12 @@
 int main(void)
 {
     mbed_trace_init();
+    tr_silly("silly print");
     tr_debug("debug print");
     tr_info("info print");
     tr_warn("warning print");
     tr_error("error print");
+    tr_critical("fatal print");
     mbed_trace_free();
     return 0;
 }

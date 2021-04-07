@@ -49,10 +49,12 @@
 #endif
 #endif /* YOTTA_CFG_MEMLIB */
 
+#define VT100_COLOR_CRITICAL "\x1b[41m"
 #define VT100_COLOR_ERROR "\x1b[31m"
 #define VT100_COLOR_WARN  "\x1b[33m"
 #define VT100_COLOR_INFO  "\x1b[39m"
 #define VT100_COLOR_DEBUG "\x1b[90m"
+#define VT100_COLOR_SILLY "\x1b[90m"
 
 /** default max trace line size in bytes */
 #ifdef MBED_TRACE_LINE_LENGTH
@@ -331,7 +333,7 @@ void mbed_vtracef(uint8_t dlevel, const char *grp, const char *fmt, va_list ap)
         mbed_trace_reset_tmp();
         goto end;
     }
-    if ((m_trace.trace_config & TRACE_MASK_LEVEL) &  dlevel) {
+    if ((m_trace.trace_config & TRACE_MASK_LEVEL) >=  dlevel) {
         bool color = (m_trace.trace_config & TRACE_MODE_COLOR) != 0;
         bool plain = (m_trace.trace_config & TRACE_MODE_PLAIN) != 0;
         bool cr    = (m_trace.trace_config & TRACE_CARRIAGE_RETURN) != 0;
@@ -363,6 +365,9 @@ void mbed_vtracef(uint8_t dlevel, const char *grp, const char *fmt, va_list ap)
                 if (bLeft > 0) {
                     //include color in ANSI/VT100 escape code
                     switch (dlevel) {
+                        case (TRACE_LEVEL_CRITICAL):
+                            retval = snprintf(ptr, bLeft, "%s", VT100_COLOR_CRITICAL);
+                            break;
                         case (TRACE_LEVEL_ERROR):
                             retval = snprintf(ptr, bLeft, "%s", VT100_COLOR_ERROR);
                             break;
@@ -374,6 +379,9 @@ void mbed_vtracef(uint8_t dlevel, const char *grp, const char *fmt, va_list ap)
                             break;
                         case (TRACE_LEVEL_DEBUG):
                             retval = snprintf(ptr, bLeft, "%s", VT100_COLOR_DEBUG);
+                            break;
+                        case (TRACE_LEVEL_SILLY):
+                            retval = snprintf(ptr, bLeft, "%s", VT100_COLOR_SILLY);
                             break;
                         default:
                             color = 0; //avoid unneeded color-terminate code
@@ -410,6 +418,9 @@ void mbed_vtracef(uint8_t dlevel, const char *grp, const char *fmt, va_list ap)
             if (bLeft > 0) {
                 //add group tag
                 switch (dlevel) {
+                    case (TRACE_LEVEL_CRITICAL):
+                        retval = snprintf(ptr, bLeft, "[CRIT][%-4s]: ", grp);
+                        break;
                     case (TRACE_LEVEL_ERROR):
                         retval = snprintf(ptr, bLeft, "[ERR ][%-4s]: ", grp);
                         break;
@@ -421,6 +432,9 @@ void mbed_vtracef(uint8_t dlevel, const char *grp, const char *fmt, va_list ap)
                         break;
                     case (TRACE_LEVEL_DEBUG):
                         retval = snprintf(ptr, bLeft, "[DBG ][%-4s]: ", grp);
+                        break;
+                    case (TRACE_LEVEL_SILLY):
+                        retval = snprintf(ptr, bLeft, "[SILL][%-4s]: ", grp);
                         break;
                     default:
                         retval = snprintf(ptr, bLeft, "              ");
