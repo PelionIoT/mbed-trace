@@ -21,7 +21,7 @@
 #undef MBED_CONF_MBED_TRACE_ENABLE
 #endif
 #define MBED_CONF_MBED_TRACE_ENABLE 1
-#ifndef MBED_CONF_MBED_TRACE_FEA_IPV6
+#if !defined(MBED_CONF_MBED_TRACE_FEA_IPV6) && MBED_CONF_NANOSTACK_LIBSERVICE_PRESENT
 #define MBED_CONF_MBED_TRACE_FEA_IPV6 1
 #endif
 
@@ -220,6 +220,7 @@ void mbed_trace_free(void)
     m_trace.tmp_data_length = DEFAULT_TRACE_TMP_LINE_LEN;
     m_trace.group_configs = 0;
     m_trace.group_configs_length = 0;
+    m_trace.tmp_data_ptr = 0;
     m_trace.prefix_f = 0;
     m_trace.suffix_f = 0;
     m_trace.printf  = mbed_trace_default_print;
