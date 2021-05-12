@@ -35,6 +35,7 @@
 #define MBED_TRACE_MEM_INCLUDE      YOTTA_CFG_MBED_TRACE_MEM_INCLUDE
 #define MBED_TRACE_MEM_ALLOC        YOTTA_CFG_MBED_TRACE_MEM_ALLOC
 #define MBED_TRACE_MEM_FREE         YOTTA_CFG_MBED_TRACE_MEM_FREE
+#define MBED_TRACE_MEM_REALLOC      YOTTA_CFG_MBED_TRACE_MEM_REALLOC
 #else /* YOTTA_CFG_MEMLIB */
 // Default options
 #ifndef MBED_TRACE_MEM_INCLUDE
@@ -46,6 +47,9 @@
 #endif
 #ifndef MBED_TRACE_MEM_FREE
 #define MBED_TRACE_MEM_FREE  free
+#endif
+#ifndef MBED_TRACE_MEM_REALLOC
+#define MBED_TRACE_MEM_REALLOC realloc
 #endif
 #endif /* YOTTA_CFG_MEMLIB */
 
@@ -93,7 +97,7 @@
 #endif
 
 /** default print function, just redirect str to printf */
-static void mbed_trace_realloc(char **buffer, int *length_ptr, int new_length);
+static void mbed_trace_nealloc(char **buffer, int *length_ptr, int new_length);
 static uint32_t mbed_trace_get_group_config_idx(const char *grp, uint32_t *max);
 static void mbed_trace_default_print(const char *str);
 static void mbed_trace_reset_tmp(void);
@@ -231,19 +235,12 @@ void mbed_trace_free(void)
 }
 static void mbed_trace_realloc(char **buffer, int *length_ptr, int new_length)
 {
-    void *new_buffer = NULL;
-    if (new_length != 0) {
-        new_buffer = MBED_TRACE_MEM_ALLOC(new_length);
-        // TODO: This may fail
-        if (*buffer != NULL) {
-            memcpy(new_buffer, *buffer, (*length_ptr > new_length)?new_length:*length_ptr);
-        }
+    void *new_buffer = MBED_TRACE_MEM_REALLOC(*buffer, new_length);
+    if (NULL != new_buffer) {
+        *buffer = new_buffer;
+        *length_ptr = new_length;
     }
-    if (*buffer != NULL) {
-        MBED_TRACE_MEM_FREE(*buffer);
-    }
-    *buffer = new_buffer;
-    *length_ptr = new_length;
+    // TODO: handle realloc failure
 }
 void mbed_trace_buffer_sizes(int lineLength, int tmpLength)
 {
