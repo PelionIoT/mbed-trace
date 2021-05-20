@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 ARM. All rights reserved.
+ * Copyright (c) 2014 ARM Limited. All rights reserved.
  */
 /**
  * \file \test_libTrace\Test.c
