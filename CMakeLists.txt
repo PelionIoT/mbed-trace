@@ -10,5 +10,3 @@ add_library(mbedTrace "${MBED_TRACE_SRC}" "")
 
 target_include_directories(mbedTrace PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/)
 target_include_directories(mbedTrace PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/mbed-trace/)
-target_include_directories(mbedTrace PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../nanostack-libservice/mbed-client-libservice/)
-target_include_directories(mbedTrace PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../nanostack-libservice/)
