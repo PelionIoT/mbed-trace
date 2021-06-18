@@ -256,23 +256,10 @@ This would reset the inclusion filters back to nothing and assuming no exclusion
 
 To run unit tests:
 
-* In Linux
-
 ```
-yotta target x86-linux-native
-yotta test mbed_trace_test
-```
-
-* In Mac
-
-```
-yotta target x86-osx-native
-yotta test mbed_trace_test
-```
-
-* In Windows
-
-```
-yotta target x86-windows-native
-yotta test mbed_trace_test
+mkdir build
+cd build
+cmake -Denable_coverage_data=1 -DCMAKE_BUILD_TYPE=Debug ..
+make
+ctest
 ```
