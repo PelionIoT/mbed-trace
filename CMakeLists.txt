@@ -48,10 +48,10 @@ PROPERTIES
 include(GoogleTest)
 gtest_discover_tests(trace_test)
 
-if (enable_coverage_data)
+if (enable_coverage_data AND ${CMAKE_PROJECT_NAME} EQUAL mbedTrace)
     file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/html")
 
-    add_test(NAME ls_cov
-        COMMAND ${BASH} -c "gcovr -r ../ . -e ${CMAKE_CURRENT_SOURCE_DIR}/test --html --html-details -o html/example-html-details.html"
+    add_test(NAME trace_cov WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMAND ${BASH} -c "gcovr -r . -e ${CMAKE_CURRENT_SOURCE_DIR}/build -e '.*test.*' --html --html-details -o build/html/example-html-details.html"
     )
 endif ()
