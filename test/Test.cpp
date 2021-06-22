@@ -240,11 +240,11 @@ TEST_F(trace, active_level_all_ipv6)
 TEST_F(trace, config_change)
 {
     mbed_trace_config_set(TRACE_MODE_COLOR | TRACE_ACTIVE_LEVEL_ALL);
-    ASSERT_TRUE(mbed_trace_config_get() == TRACE_MODE_COLOR | TRACE_ACTIVE_LEVEL_ALL);
+    ASSERT_TRUE(mbed_trace_config_get() == (TRACE_MODE_COLOR | TRACE_ACTIVE_LEVEL_ALL));
     mbed_trace_config_set(TRACE_MODE_PLAIN | TRACE_ACTIVE_LEVEL_NONE);
-    ASSERT_TRUE(mbed_trace_config_get() == TRACE_MODE_PLAIN | TRACE_ACTIVE_LEVEL_NONE);
+    ASSERT_TRUE(mbed_trace_config_get() == (TRACE_MODE_PLAIN | TRACE_ACTIVE_LEVEL_NONE));
     mbed_trace_config_set(TRACE_MODE_PLAIN | TRACE_ACTIVE_LEVEL_ALL);
-    ASSERT_TRUE(mbed_trace_config_get() == TRACE_MODE_PLAIN | TRACE_ACTIVE_LEVEL_ALL);
+    ASSERT_TRUE(mbed_trace_config_get() == (TRACE_MODE_PLAIN | TRACE_ACTIVE_LEVEL_ALL));
 }
 
 TEST_F(trace, active_level_all_color)
