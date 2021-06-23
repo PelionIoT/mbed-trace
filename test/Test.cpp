@@ -21,6 +21,10 @@
 
 #include "gtest/gtest.h"
 
+#ifdef MBED_CONF_MBED_TRACE_ENABLE
+#undef MBED_CONF_MBED_TRACE_ENABLE
+#endif
+
 #define MBED_CONF_MBED_TRACE_ENABLE 1
 #define MBED_CONF_MBED_TRACE_FEA_IPV6 1
 
