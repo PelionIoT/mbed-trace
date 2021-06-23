@@ -411,7 +411,7 @@ char *mbed_trace_array(const uint8_t *buf, uint16_t len);
 #elif !defined(MBED_TRACE_DUMMIES_DEFINED)
 // define dummies, hiding the real functions
 #define MBED_TRACE_DUMMIES_DEFINED
-#define mbed_trace_init(...)                        ((int) 0)
+#define mbed_trace_init(...)                        ((void) 0)
 #define mbed_trace_free(...)                        ((void) 0)
 #define mbed_trace_buffer_sizes(...)                ((void) 0)
 #define mbed_trace_config_set(...)                  ((void) 0)
@@ -420,8 +420,8 @@ char *mbed_trace_array(const uint8_t *buf, uint16_t len);
 #define mbed_trace_suffix_function_set(...)         ((void) 0)
 #define mbed_trace_print_function_set(...)          ((void) 0)
 #define mbed_trace_cmdprint_function_set(...)       ((void) 0)
-#define mbed_trace_mutex_wait_function_set(...)     ((void) 0)
-#define mbed_trace_mutex_release_function_set(...)  ((void) 0)
+#define mbed_trace_mutex_wait_function_set(...)     ((void) __VA_ARGS__)
+#define mbed_trace_mutex_release_function_set(...)  ((void) __VA_ARGS__)
 #define mbed_trace_exclude_filters_set(...)         ((void) 0)
 #define mbed_trace_exclude_filters_get(...)         ((const char *) 0)
 #define mbed_trace_include_filters_set(...)         ((void) 0)
