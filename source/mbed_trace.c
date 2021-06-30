@@ -304,7 +304,7 @@ static int8_t mbed_trace_skip(int8_t dlevel, const char *grp)
 }
 static void mbed_trace_default_print(const char *str)
 {
-    puts(str);
+    printf("%s", str);
 }
 void mbed_tracef(uint8_t dlevel, const char *grp, const char *fmt, ...)
 {
@@ -351,7 +351,7 @@ void mbed_vtracef(uint8_t dlevel, const char *grp, const char *fmt, va_list ap)
         } else {
             if (color) {
                 if (cr) {
-                    retval = snprintf(ptr, bLeft, "\r\x1b[2K");
+                    retval = snprintf(ptr, bLeft, "\n");
                     if (retval >= bLeft) {
                         retval = 0;
                     }
