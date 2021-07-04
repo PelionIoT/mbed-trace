@@ -15,6 +15,8 @@ if(DEFINED TARGET_LIKE_X86_WINDOWS_NATIVE OR DEFINED TARGET_LIKE_X86_LINUX_NATIV
         add_dependencies(all_tests mbed_trace_test)
     elseif(DEFINED TARGET_LIKE_X86_LINUX_NATIVE)
         SET(TEST_EXECUTABLE "../../../build/x86-linux-native/test/mbed_trace_test")
+        find_package (Threads)
+        target_link_libraries (mbed_trace_test ${CMAKE_THREAD_LIBS_INIT})
         add_test(mbed_trace_test ${TEST_EXECUTABLE})
         add_dependencies(all_tests mbed_trace_test)
     elseif(DEFINED TARGET_LIKE_X86_OSX_NATIVE)
