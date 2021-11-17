@@ -1,5 +1,5 @@
 #################################################################################
-## Copyright 2021 Pelion.
+## Copyright 2020-2021 Pelion.
 ##
 ## SPDX-License-Identifier: Apache-2.0
 ##
@@ -16,12 +16,15 @@
 ## limitations under the License.
 #################################################################################
 
-# Mbed OS target build
-if(DEFINED MBED_TOOLCHAIN)
-    include(mbed-trace-mbed.cmake)
-else()
-    cmake_minimum_required (VERSION 3.11)
-    project(mbedTrace)
-    include(mbed-trace.cmake)
-endif()
+target_include_directories(mbed-core
+    INTERFACE
+        .
+        mbed-trace
+        include
+        include/mbed-trace
+)
 
+target_sources(mbed-core
+    INTERFACE
+        source/mbed_trace.c
+)
