@@ -245,7 +245,7 @@ void mbed_trace_suffix_function_set(char *(*suffix_f)(void));
  * but with this you can write own print function,
  * for e.g. to other IO device.
  */
-void mbed_trace_print_function_set(void (*print_f)(const char *));
+void mbed_trace_print_function_set(void (*print_f)(const char *fmt, ...));
 /**
  * Set trace print function for tr_cmdline()
  */
