@@ -252,7 +252,7 @@ void mbed_trace_suffix_function_set(char *(*suffix_f)(void))
 {
     m_trace.suffix_f = suffix_f;
 }
-void mbed_trace_print_function_set(void (*printf)(const char *))
+void mbed_trace_print_function_set(void (*printf)(const char *fmt, ...))
 {
     m_trace.printf = printf;
 }
